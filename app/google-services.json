@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "435806940726",
+    "firebase_url": "https://meetingmatesunimelb.firebaseio.com",
+    "project_id": "meetingmatesunimelb",
+    "storage_bucket": "meetingmatesunimelb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435806940726:android:c1145683989ce46f5f7297",
+        "android_client_info": {
+          "package_name": "com.team33.meetingmate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "435806940726-3t957spuv339o9cj589297rags77t3al.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRKCM-x-pSMF-xHnnDEh0uSpXpwvqOPV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "435806940726-3t957spuv339o9cj589297rags77t3al.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
