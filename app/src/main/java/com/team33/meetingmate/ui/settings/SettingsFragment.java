@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.team33.meetingmate.R;
 
@@ -91,10 +92,22 @@ public class SettingsFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: called.");
-        super.onDestroy();
-        getActivity().unregisterReceiver(mBroadcastReceiver1);
+    public void onDestroyView() {
+        super.onDestroyView();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver1);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver1);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver1, BTIntent);
     }
 
     public void enableDisableBT(){
@@ -107,7 +120,7 @@ public class SettingsFragment extends Fragment {
             startActivity(enableBTIntent);
 
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            getActivity().registerReceiver(mBroadcastReceiver1, BTIntent);
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver1, BTIntent);
         }
         if(mBluetoothAdapter.isEnabled()){
             Log.d(TAG, "enableDisableBT: disabling BT.");
