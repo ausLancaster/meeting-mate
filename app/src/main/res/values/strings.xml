@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MeetingMate</string>
+    <string name="title_activity_app">AppActivity</string>
+    <string name="title_calendar">Calendar</string>
+    <string name="title_files">Files</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_settings">Settings</string>
 </resources>
