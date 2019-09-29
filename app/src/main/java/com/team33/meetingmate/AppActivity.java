@@ -1,14 +1,10 @@
 package com.team33.meetingmate;
 
 import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -27,7 +23,8 @@ public class AppActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+
+        CustomBottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -62,12 +59,14 @@ public class AppActivity extends AppCompatActivity {
     private void showFABMenu() {
         isFabOpen = true;
 
-        fabAddDocument.animate().translationX(-getResources().getDimension(R.dimen.standard_65));
-        fabCamera.animate().translationY(-getResources().getDimension(R.dimen.standard_53))
-                .translationX(-getResources().getDimension(R.dimen.standard_33));
-        fabMic.animate().translationY(-getResources().getDimension(R.dimen.standard_53))
-                .translationX(getResources().getDimension(R.dimen.standard_33));
-        fabCreateMeeting.animate().translationX(getResources().getDimension(R.dimen.standard_65));
+        fabAddDocument.animate().translationY(-getResources().getDimension(R.dimen.standard_20))
+                .translationX(-getResources().getDimension(R.dimen.standard_65));
+        fabCamera.animate().translationY(-getResources().getDimension(R.dimen.standard_58))
+                .translationX(-getResources().getDimension(R.dimen.standard_28));
+        fabMic.animate().translationY(-getResources().getDimension(R.dimen.standard_58))
+                .translationX(getResources().getDimension(R.dimen.standard_28));
+        fabCreateMeeting.animate().translationY(-getResources().getDimension(R.dimen.standard_20))
+                .translationX(getResources().getDimension(R.dimen.standard_65));
     }
 
     private void closeFABMenu() {

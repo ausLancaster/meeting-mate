@@ -6,13 +6,11 @@
     android:layout_height="match_parent"
     android:paddingTop="?attr/actionBarSize">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <com.team33.meetingmate.CustomBottomNavigationView
         android:id="@+id/nav_view"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        android:background="?android:attr/windowBackground"
+        android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -24,11 +22,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="18dp"
         android:src="@drawable/ic_camera_alt_white_24dp"
+        android:layout_marginBottom="50dp"
         app:fabSize="mini"
         app:backgroundTint="@color/design_default_color_primary"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -38,13 +36,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="18dp"
         android:src="@drawable/ic_mic_white_24dp"
+        android:layout_marginBottom="50dp"
         app:fabSize="mini"
         app:backgroundTint="@color/design_default_color_primary"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"  />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_document"
@@ -52,11 +50,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="18dp"
         android:src="@drawable/ic_note_add_white_24dp"
+        android:layout_marginBottom="50dp"
         app:fabSize="mini"
         app:backgroundTint="@color/design_default_color_primary"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -66,13 +64,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="18dp"
         android:src="@drawable/ic_group_white_24dp"
         app:backgroundTint="@color/design_default_color_primary"
+        android:layout_marginBottom="50dp"
         app:fabSize="mini"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"  />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_plus"
@@ -80,13 +78,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|end"
-        android:layout_margin="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_margin="42dp"
+        android:layout_marginBottom="42dp"
         android:scaleType="center"
         android:src="@drawable/ic_add_white_48dp"
         app:backgroundTint="@color/design_default_color_primary"
         app:fabSize="normal"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:maxImageSize="36dp" />
