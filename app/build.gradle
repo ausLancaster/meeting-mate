@@ -27,6 +27,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'
     implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -44,10 +45,13 @@ dependencies {
     implementation 'pub.devrel:easypermissions:0.3.0'
     implementation('com.google.api-client:google-api-client-android:1.23.0') {
         exclude group: 'org.apache.httpcomponents'
+        exclude group: 'com.google.guava'
     }
     implementation('com.google.apis:google-api-services-calendar:v3-rev305-1.23.0') {
         exclude group: 'org.apache.httpcomponents'
+        exclude group: 'com.google.guava'
     }
+    implementation group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.22.0'
 }
 
 // Firebase SDK

@@ -3,15 +3,6 @@
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.team33.meetingmate">
 
-    <uses-feature android:name="android.hardware.bluetooth" />
-
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <dist:module dist:instant="true" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,21 +10,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LauncherActivity">
+        <activity
+            android:name=".CalendarActivity"
+            android:label="@string/title_activity_calendar"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+        <activity android:name=".LauncherActivity"></activity>
         <activity
             android:name=".AppActivity"
-            android:label="@string/title_activity_app">
-        </activity>
+            android:label="@string/title_activity_app"></activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.authentication.LoginActivity" />
         <activity android:name=".ui.authentication.RegistrationActivity" />
         <activity android:name=".ui.authentication.ForgotPasswordActivity" />
     </application>
+
+    <uses-feature android:name="android.hardware.bluetooth" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <dist:module dist:instant="true" />
 
 </manifest>
