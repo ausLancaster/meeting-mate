@@ -1,10 +1,22 @@
 package com.team33.meetingmate;
 
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -19,6 +31,7 @@ public class AppActivity extends AppCompatActivity {
     private FloatingActionButton fabCreateMeeting;
     private FloatingActionButton fabAddDocument;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +67,47 @@ public class AppActivity extends AppCompatActivity {
                 }
             }
         });
+
+        System.out.println("Initialising location services");
+        // Location listener
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location loc) {
+                String lat = Double.toString(loc.getLongitude());
+                String lng = Double.toString(loc.getLatitude());
+                System.out.println("LOCATION: " + lat + lng);
+                Toast.makeText(getBaseContext(), "Location: {Lat: " + lat + ", Lng: " + lng + "}", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+        };
+
+        // Check for permissions
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            System.out.println("Permission granted");
+            // Check if GPS is enabled
+            ContentResolver contentResolver = getBaseContext().getContentResolver();
+            Boolean gpsEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.GPS_PROVIDER);
+            if (gpsEnabled) {
+                System.out.println("GPS enabled");
+                // Get location update every 5 seconds
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+            } else {
+                Toast.makeText(getBaseContext(), "GPS is turned off", Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 
     private void showFABMenu() {
