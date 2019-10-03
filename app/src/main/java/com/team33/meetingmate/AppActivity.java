@@ -10,7 +10,6 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,6 +22,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 public class AppActivity extends AppCompatActivity {
 
     private boolean isFabOpen;
@@ -30,6 +33,10 @@ public class AppActivity extends AppCompatActivity {
     private FloatingActionButton fabMic;
     private FloatingActionButton fabCreateMeeting;
     private FloatingActionButton fabAddDocument;
+
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private Location location;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -68,15 +75,14 @@ public class AppActivity extends AppCompatActivity {
             }
         });
 
-        System.out.println("Initialising location services");
-        // Location listener
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
+        // Location services
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location loc) {
+                setLocation(loc);
                 String lat = Double.toString(loc.getLongitude());
                 String lng = Double.toString(loc.getLatitude());
-                System.out.println("LOCATION: " + lat + lng);
                 Toast.makeText(getBaseContext(), "Location: {Lat: " + lat + ", Lng: " + lng + "}", Toast.LENGTH_SHORT).show();
             }
 
@@ -93,21 +99,31 @@ public class AppActivity extends AppCompatActivity {
             }
         };
 
-        // Check for permissions
+        // Check for location permissions
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            System.out.println("Permission granted");
-            // Check if GPS is enabled
+            // Check if GPS or network is enabled
             ContentResolver contentResolver = getBaseContext().getContentResolver();
             Boolean gpsEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.GPS_PROVIDER);
+            Boolean networkEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.NETWORK_PROVIDER);
+
             if (gpsEnabled) {
-                System.out.println("GPS enabled");
-                // Get location update every 5 seconds
+                // Location GPS Provider enabled
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+            } else if (networkEnabled) {
+                // Location Network Provider enabled
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
             } else {
-                Toast.makeText(getBaseContext(), "GPS is turned off", Toast.LENGTH_SHORT).show();
+                // No location provider enabled
+                Toast.makeText(getBaseContext(), "Unable to fetch location", Toast.LENGTH_SHORT).show();
             }
         }
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        locationManager.removeUpdates(locationListener);
     }
 
     private void showFABMenu() {
@@ -130,6 +146,22 @@ public class AppActivity extends AppCompatActivity {
         fabCamera.animate().translationY(0).translationX(0);
         fabMic.animate().translationY(0).translationX(0);
         fabCreateMeeting.animate().translationY(0).translationX(0);
+    }
+
+    public Date getTime() {
+        return Calendar.getInstance().getTime();
+    }
+
+    public TimeZone getTimeZone() {
+        return Calendar.getInstance().getTimeZone();
+    }
+
+    public Location getLocation() {
+        return this.location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
 }
