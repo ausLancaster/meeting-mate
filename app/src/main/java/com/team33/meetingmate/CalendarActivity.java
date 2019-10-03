@@ -1,152 +1,167 @@
 package com.team33.meetingmate;
 
-import android.accounts.Account;
+import android.Manifest;
+import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.DateTime;
-import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.util.Log;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 
 public class CalendarActivity extends AppCompatActivity {
-    private static final String APPLICATION_NAME = "Google Calendar API Java Quickstart";
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+
     private static final String PREF_ACCOUNT_NAME = "accountName";
 
-    /**
-     * Global instance of the scopes required by this quickstart.
-     * If modifying these scopes, delete your previously saved tokens/ folder.
-     */
-    private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
-    private static final String CREDENTIALS_FILE_PATH = "credentials.json";
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
 
-    private Events events;
-    private Calendar service;
+    static final int REQUEST_AUTHORIZATION = 1;
 
-    /**
-     * Creates an authorized Credential object.
-     * @param HTTP_TRANSPORT The network HTTP Transport.
-     * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, Context context) throws IOException {
-        // Load client secrets.
-        AssetManager assetManager = context.getAssets();
-        InputStream in = assetManager.open(CREDENTIALS_FILE_PATH);;
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+    static final int REQUEST_ACCOUNT_PICKER = 2;
+
+    private static final String APPLICATION_NAME = "Google Calendar API";
+
+    final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+
+    final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+
+    Calendar service;
+    GoogleAccountCredential credential;
+
+    List<Event> items;
+
+    int numAsyncTasks;
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.GET_ACCOUNTS},
+                1);
+
+        credential =
+                GoogleAccountCredential.usingOAuth2(this, Collections.singleton(CalendarScopes.CALENDAR));
+        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+        credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
+        Log.d("Calendar", credential.getSelectedAccountName() != null ? credential.getSelectedAccountName() : "null");
+        /*if (credential.getSelectedAccountName() == null) {
+            // ask user to choose account
+            chooseAccount();
+            Log.d("Calendar", credential.getSelectedAccountName() != null ? credential.getSelectedAccountName() : "null");
+        }*/
+        service =
+                new Calendar.Builder(httpTransport, jsonFactory, credential)
+                        .setApplicationName(APPLICATION_NAME)
+                        .build();
+    }
+
+    /** Check that Google Play services APK is installed and up to date. */
+    private boolean checkGooglePlayServicesAvailable() {
+        final int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+            return false;
         }
+        return true;
+    }
 
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+    private void haveGooglePlayServices() {
+        // check if there is already an account selected
+        if (credential.getSelectedAccountName() == null) {
+            // ask user to choose account
+            chooseAccount();
+        } else {
+            // load calendars
+            AsyncLoadTasks.run(this);
+        }
+    }
 
-        Log.d("Calendar", "Done Credentials");
+    private void chooseAccount() {
+        startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+    }
 
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
-                .build();
-        Log.d("Calendar", "NExt");
+    void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                Dialog dialog =
+                        GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, CalendarActivity.this,
+                                REQUEST_GOOGLE_PLAY_SERVICES);
+                dialog.show();
+            }
+        });
+    }
 
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Log.d("Calendar", "NExt");
-
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-        Log.d("Calendar", "Credentials succeeded");
-        return credential;
-
+    void refreshView() {
+        Log.d("Calendar", "refreshView");
+        for (Event event : items) {
+            Log.d("Calendar", event.getSummary());
+        }
+        //adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksList);
+        //listView.setAdapter(adapter);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-            // Build a new authorized API client service.
-            /*final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
-            Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT, getApplicationContext()))
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();*/
-            GoogleAccountCredential credential =
-                    GoogleAccountCredential.usingOAuth2(this, SCOPES);
-            SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-            //credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
-            credential.setSelectedAccount(new Account("aus.lancaster@gmail.com", "com.team33.meetingmate"));
-
-            final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
-            service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-
-            Log.d("Calendar", "Execute");
-            new GetEvents().execute();
-
+    protected void onResume() {
+        super.onResume();
+        if (checkGooglePlayServicesAvailable()) {
+            haveGooglePlayServices();
+        }
     }
 
-    private class GetEvents extends AsyncTask<Void, Void, String> {
-
-        @Override
-        protected String doInBackground(Void... params) {
-
-            // List the next 10 events from the primary calendar.
-            DateTime now = new DateTime(System.currentTimeMillis());
-
-            try {
-                events = service.events().list("primary")
-                        .setMaxResults(10)
-                        .setTimeMin(now)
-                        .setOrderBy("startTime")
-                        .setSingleEvents(true)
-                        .execute();
-            } catch (IOException e) {
-                Log.d("Calendar", events != null ? events.toString() : "null");
-            }
-
-            return "";
-        }
-
-        @Override
-        protected void onPostExecute(String token) {
-            List<Event> items = events.getItems();
-            if (items.isEmpty()) {
-                Log.d("Calendar", "No upcoming events found.");
-            } else {
-                Log.d("Calendar", "Upcoming events");
-                for (Event event : items) {
-                    DateTime start = event.getStart().getDateTime();
-                    if (start == null) {
-                        start = event.getStart().getDate();
-                    }
-                    Log.d("Calendar", event.getSummary() + " " + start);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_GOOGLE_PLAY_SERVICES:
+                if (resultCode == Activity.RESULT_OK) {
+                    haveGooglePlayServices();
+                } else {
+                    checkGooglePlayServicesAvailable();
                 }
-            }
+                break;
+            case REQUEST_AUTHORIZATION:
+                if (resultCode == Activity.RESULT_OK) {
+                    AsyncLoadTasks.run(this);
+                } else {
+                    chooseAccount();
+                }
+                break;
+            case REQUEST_ACCOUNT_PICKER:
+                Log.d("Calendar", "request account picker");
+                if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
+                    String accountName = data.getExtras().getString(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        Log.d("Calendar", "accountName not null: " + accountName);
+                        credential.setSelectedAccountName(accountName);
+                        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.commit();
+                        AsyncLoadTasks.run(this);
+                    } else {
+                        Log.d("Calendar", "accountName is null");
+                    }
+                }
+                break;
         }
     }
 }

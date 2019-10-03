@@ -52,6 +52,7 @@ dependencies {
         exclude group: 'com.google.guava'
     }
     implementation group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.22.0'
+    implementation 'com.google.http-client:google-http-client-gson:1.19.0'
 }
 
 // Firebase SDK
