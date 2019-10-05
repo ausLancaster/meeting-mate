@@ -1,8 +1,10 @@
 package com.team33.meetingmate;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -28,6 +30,8 @@ import java.util.TimeZone;
 
 public class AppActivity extends AppCompatActivity {
 
+    private static final Integer ATTACH_FILE_RESULT_CODE = 1;
+
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
     private FloatingActionButton fabMic;
@@ -37,6 +41,8 @@ public class AppActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location location;
+
+    private BluetoothAdapter bluetoothAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -72,6 +78,18 @@ public class AppActivity extends AppCompatActivity {
                 } else {
                     closeFABMenu();
                 }
+            }
+        });
+
+        // Document
+        fabAddDocument.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("file/*");
+                intent.putExtra("CONTENT_TYPE", "*/*");
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                startActivityForResult(intent, ATTACH_FILE_RESULT_CODE);
             }
         });
 
@@ -118,12 +136,24 @@ public class AppActivity extends AppCompatActivity {
             }
         }
 
+        // Bluetooth
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == ATTACH_FILE_RESULT_CODE) {
+            String filePath = data.getData().getPath();
+            System.out.println(filePath);
+        }
     }
 
     private void showFABMenu() {
@@ -162,6 +192,10 @@ public class AppActivity extends AppCompatActivity {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public BluetoothAdapter getBluetoothAdapter() {
+        return bluetoothAdapter;
     }
 
 }

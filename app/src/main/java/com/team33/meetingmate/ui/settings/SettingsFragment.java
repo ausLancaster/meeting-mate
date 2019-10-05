@@ -20,6 +20,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.team33.meetingmate.AppActivity;
 import com.team33.meetingmate.R;
 
 import static android.content.ContentValues.TAG;
@@ -29,16 +30,15 @@ public class SettingsFragment extends Fragment {
     private static final String TAG = "AppActivity";
 
     private SettingsViewModel settingsViewModel;
-
-    BluetoothAdapter mBluetoothAdapter;
+    private AppActivity activity;
 
     // Create a BroadcastReceiver for ACTION_FOUND
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             // When discovery finds a device
-            if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
+            if (action.equals(activity.getBluetoothAdapter().ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, activity.getBluetoothAdapter().ERROR);
 
                 switch(state){
                     case BluetoothAdapter.STATE_OFF:
@@ -78,8 +78,7 @@ public class SettingsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         View v = getView();
-
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        activity = ((AppActivity) getActivity());
 
         Button btnONOFF = (Button) v.findViewById(R.id.btnONOFF);
         btnONOFF.setOnClickListener(new View.OnClickListener() {
@@ -89,6 +88,12 @@ public class SettingsFragment extends Fragment {
                 enableDisableBT();
             }
         });
+
+        TextView textTime = (TextView) v.findViewById(R.id.text_time);
+        textTime.setText(activity.getTime() == null ? "" : activity.getTime().toString());
+
+        TextView textLocation = (TextView) v.findViewById(R.id.text_location);
+        textLocation.setText(activity.getLocation() == null ? "" : activity.getLocation().toString());
     }
 
     @Override
@@ -111,10 +116,10 @@ public class SettingsFragment extends Fragment {
     }
 
     public void enableDisableBT(){
-        if(mBluetoothAdapter == null){
+        if(activity.getBluetoothAdapter() == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
         }
-        if(!mBluetoothAdapter.isEnabled()){
+        if(!activity.getBluetoothAdapter().isEnabled()){
             Log.d(TAG, "enableDisableBT: enabling BT.");
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivity(enableBTIntent);
@@ -122,9 +127,9 @@ public class SettingsFragment extends Fragment {
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver1, BTIntent);
         }
-        if(mBluetoothAdapter.isEnabled()){
+        if(activity.getBluetoothAdapter().isEnabled()){
             Log.d(TAG, "enableDisableBT: disabling BT.");
-            mBluetoothAdapter.disable();
+            activity.getBluetoothAdapter().disable();
 
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             getActivity().registerReceiver(mBroadcastReceiver1, BTIntent);
