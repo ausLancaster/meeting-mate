@@ -2,6 +2,8 @@ package com.team33.meetingmate;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,6 +46,8 @@ public class AppActivity extends AppCompatActivity {
     private Location location;
 
     private BluetoothAdapter bluetoothAdapter;
+    private BroadcastReceiver bluetoothBroadcastReceiver;
+    private ArrayAdapter<String> bluetoothArrayAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -137,7 +142,23 @@ public class AppActivity extends AppCompatActivity {
         }
 
         // Bluetooth
+        bluetoothArrayAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item_1, R.id.list_devices);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                // Searching for devices
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Get bluetooth device object from the intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // Add name and address of device to an array adapter
+                    bluetoothArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    System.out.println(device.getName() + "\n" + device.getAddress());
+                }
+            }
+        };
 
     }
 
@@ -196,6 +217,9 @@ public class AppActivity extends AppCompatActivity {
 
     public BluetoothAdapter getBluetoothAdapter() {
         return bluetoothAdapter;
+    }
+    public BroadcastReceiver getBluetoothBroadcastReceiver() {
+        return bluetoothBroadcastReceiver;
     }
 
 }
