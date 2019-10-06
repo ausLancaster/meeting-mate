@@ -34,32 +34,6 @@ public class SettingsFragment extends Fragment {
     private SettingsViewModel settingsViewModel;
     private AppActivity activity;
 
-    // Create a BroadcastReceiver for ACTION_FOUND
-//    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//            // When discovery finds a device
-//            if (action.equals(activity.getBluetoothAdapter().ACTION_STATE_CHANGED)) {
-//                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, activity.getBluetoothAdapter().ERROR);
-//
-//                switch(state){
-//                    case BluetoothAdapter.STATE_OFF:
-//                        Log.d(TAG, "onReceive: STATE OFF");
-//                        break;
-//                    case BluetoothAdapter.STATE_TURNING_OFF:
-//                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
-//                        break;
-//                    case BluetoothAdapter.STATE_ON:
-//                        Log.d(TAG, "mBroadcastReceiver1: STATE ON");
-//                        break;
-//                    case BluetoothAdapter.STATE_TURNING_ON:
-//                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
-//                        break;
-//                }
-//            }
-//        }
-//    };
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         settingsViewModel =
@@ -83,6 +57,7 @@ public class SettingsFragment extends Fragment {
         activity = ((AppActivity) getActivity());
 
         ListView listDevices = (ListView) v.findViewById(R.id.list_devices);
+        listDevices.setAdapter(activity.getBluetoothArrayAdapter());
 
         Button btnONOFF = (Button) v.findViewById(R.id.btnONOFF);
         btnONOFF.setOnClickListener(new View.OnClickListener() {
@@ -102,50 +77,37 @@ public class SettingsFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-//        LocalBroadcastManager.getInstance(activity).unregisterReceiver(mBroadcastReceiver1);
-        LocalBroadcastManager.getInstance(activity).unregisterReceiver(activity.getBluetoothBroadcastReceiver());
+    public void onResume() {
+        super.onResume();
+        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), BTIntent);
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-//        LocalBroadcastManager.getInstance(activity).unregisterReceiver(mBroadcastReceiver1);
         LocalBroadcastManager.getInstance(activity).unregisterReceiver(activity.getBluetoothBroadcastReceiver());
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-//        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-//        LocalBroadcastManager.getInstance(activity).registerReceiver(mBroadcastReceiver1, BTIntent);
-    }
-
-//    public void enableDisableBT(){
-//        if(activity.getBluetoothAdapter() == null){
-//            Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
-//        }
-//        if(!activity.getBluetoothAdapter().isEnabled()){
-//            Log.d(TAG, "enableDisableBT: enabling BT.");
-//            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//            startActivity(enableBTIntent);
-//
-//            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-//            LocalBroadcastManager.getInstance(activity).registerReceiver(mBroadcastReceiver1, BTIntent);
-//        }
-//        if(activity.getBluetoothAdapter().isEnabled()){
-//            Log.d(TAG, "enableDisableBT: disabling BT.");
-//            activity.getBluetoothAdapter().disable();
-//
-//            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-//            activity.registerReceiver(mBroadcastReceiver1, BTIntent);
-//        }
-//    }
-
     public void scanForDevices() {
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        activity.registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
+        if (activity.getBluetoothAdapter() == null) {
+            Log.d(TAG, "Does not have BT capabilities.");
+        } else {
+            if (!activity.getBluetoothAdapter().isEnabled()) {
+                Log.d(TAG, "Enabling BT.");
+                Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivity(enableBTIntent);
+
+                IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+                LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), BTIntent);
+            }
+            Log.d(TAG, "Scanning for devices");
+
+            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+            LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
+        }
     }
 
 }
