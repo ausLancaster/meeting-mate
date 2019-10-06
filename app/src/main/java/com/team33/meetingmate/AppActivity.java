@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Toast;
 
@@ -24,7 +26,10 @@ public class AppActivity extends AppCompatActivity {
 
     private final static int CAMERA_RESULT_REQUEST_CODE = 100;
     private final static int CAMERA_PERMISSION_REQUEST_CODE = 101;
-    private final static int DOCUMENT_RESULT_REQUEST_CODE = 102;
+    private final static int AUDIO_RECODING_PERMISSION_REQUEST_CODE = 102;
+    private final static int DOCUMENT_RESULT_REQUEST_CODE = 103;
+    private final static int AUDIO_RECORDING_RESULT_REQUEST_CODE = 104;
+
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -95,6 +100,24 @@ public class AppActivity extends AppCompatActivity {
                 startActivityForResult(intent, DOCUMENT_RESULT_REQUEST_CODE);
             }
         });
+
+        fabMic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                if (ContextCompat.checkSelfPermission(AppActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(
+                            AppActivity.this,
+                            new String[]{Manifest.permission.RECORD_AUDIO},
+                            AUDIO_RECODING_PERMISSION_REQUEST_CODE);
+                } else {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, AUDIO_RECORDING_RESULT_REQUEST_CODE);
+                }
+            }
+        });
     }
 
     @Override
@@ -103,14 +126,24 @@ public class AppActivity extends AppCompatActivity {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_RESULT_REQUEST_CODE);
-            } else {
-                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_LONG)
-                        .show();
-            }
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_RESULT_REQUEST_CODE);
+                } else {
+                    Toast.makeText(this, "Camera permission denied", Toast.LENGTH_LONG)
+                            .show();
+                }
+                break;
+            case AUDIO_RECODING_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, AUDIO_RECORDING_RESULT_REQUEST_CODE);
+                } else {
+                    Toast.makeText(this, "Audio recoding permission denied", Toast.LENGTH_LONG)
+                            .show();
+                }
         }
     }
 
@@ -122,11 +155,15 @@ public class AppActivity extends AppCompatActivity {
             switch (requestCode) {
                 case CAMERA_RESULT_REQUEST_CODE:
                     Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    Toast.makeText(this, "got image", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "got image " + photo.getHeight() + "x" + photo.getWidth(), Toast.LENGTH_LONG).show();
                     break;
                 case DOCUMENT_RESULT_REQUEST_CODE:
                     String filePath = data.getData().getPath();
                     Toast.makeText(this, "got document from " + filePath, Toast.LENGTH_LONG).show();
+                    break;
+                case AUDIO_RECORDING_RESULT_REQUEST_CODE:
+                    Uri audioUri = data.getData();
+                    Toast.makeText(this, "got audio from uri: " + audioUri, Toast.LENGTH_LONG).show();
                     break;
             }
         }
