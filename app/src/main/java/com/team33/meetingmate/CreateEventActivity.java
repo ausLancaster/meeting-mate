@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -58,7 +60,11 @@ public class CreateEventActivity extends AppCompatActivity {
     private DatePicker datePicker;
     private java.util.Calendar calendar;
     private TextView dateView;
-    private int year, month, day;
+    private int year, month, day, hour, min;
+
+    private TimePicker timePicker1;
+    private TextView time;
+    private String format = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +78,12 @@ public class CreateEventActivity extends AppCompatActivity {
         month = calendar.get(java.util.Calendar.MONTH);
         day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
         showDate(year, month+1, day);
+
+        time = (TextView) findViewById(R.id.textView4);
+
+        hour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+        min = calendar.get(java.util.Calendar.MINUTE);
+        showTime(hour, min);
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.GET_ACCOUNTS},
@@ -87,7 +99,6 @@ public class CreateEventActivity extends AppCompatActivity {
                         .build();
     }
 
-    @SuppressWarnings("deprecation")
     public void setDate(View view) {
         showDialog(999);
         Toast.makeText(getApplicationContext(), "ca",
@@ -101,6 +112,8 @@ public class CreateEventActivity extends AppCompatActivity {
         if (id == 999) {
             return new DatePickerDialog(this,
                     myDateListener, year, month, day);
+        } else if (id == 998) {
+            return new TimePickerDialog(this, myTimeListener, hour, min, false);
         }
         return null;
     }
@@ -110,17 +123,41 @@ public class CreateEventActivity extends AppCompatActivity {
                 @Override
                 public void onDateSet(DatePicker arg0,
                                       int arg1, int arg2, int arg3) {
-                    // TODO Auto-generated method stub
-                    // arg1 = year
-                    // arg2 = month
-                    // arg3 = day
                     showDate(arg1, arg2+1, arg3);
                 }
             };
 
+    private TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            showTime(i, i1);
+        }
+    };
+
     private void showDate(int year, int month, int day) {
         dateView.setText(new StringBuilder().append(day).append("/")
                 .append(month).append("/").append(year));
+    }
+
+    public void setTime(View view) {
+        showDialog(998);
+    }
+
+    public void showTime(int hour, int min) {
+        if (hour == 0) {
+            hour += 12;
+            format = "AM";
+        } else if (hour == 12) {
+            format = "PM";
+        } else if (hour > 12) {
+            hour -= 12;
+            format = "PM";
+        } else {
+            format = "AM";
+        }
+
+        time.setText(new StringBuilder().append(hour).append(" : ").append(min)
+                .append(" ").append(format));
     }
 
 
