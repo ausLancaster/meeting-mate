@@ -24,6 +24,7 @@ public class AppActivity extends AppCompatActivity {
 
     private final static int CAMERA_RESULT_REQUEST_CODE = 100;
     private final static int CAMERA_PERMISSION_REQUEST_CODE = 101;
+    private final static int DOCUMENT_RESULT_REQUEST_CODE = 102;
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -84,6 +85,16 @@ public class AppActivity extends AppCompatActivity {
                 }
             }
         });
+
+        fabAddDocument.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+                startActivityForResult(intent, DOCUMENT_RESULT_REQUEST_CODE);
+            }
+        });
     }
 
     @Override
@@ -107,9 +118,17 @@ public class AppActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == CAMERA_RESULT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            Toast.makeText(this, "got image", Toast.LENGTH_LONG).show();
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case CAMERA_RESULT_REQUEST_CODE:
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    Toast.makeText(this, "got image", Toast.LENGTH_LONG).show();
+                    break;
+                case DOCUMENT_RESULT_REQUEST_CODE:
+                    String filePath = data.getData().getPath();
+                    Toast.makeText(this, "got document from " + filePath, Toast.LENGTH_LONG).show();
+                    break;
+            }
         }
     }
 
@@ -134,5 +153,4 @@ public class AppActivity extends AppCompatActivity {
         fabMic.animate().translationY(0).translationX(0);
         fabCreateMeeting.animate().translationY(0).translationX(0);
     }
-
 }
