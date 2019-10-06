@@ -14,10 +14,7 @@ package com.team33.meetingmate;
  * the License.
  */
 
-import android.util.Log;
-
 import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
@@ -29,13 +26,12 @@ import java.io.IOException;
  */
 class AsyncLoadTasks extends CommonAsyncTask {
 
-    AsyncLoadTasks(CalendarActivity calendarActivity) {
-        super(calendarActivity);
+    AsyncLoadTasks(CreateEventActivity createEventActivity) {
+        super(createEventActivity);
     }
 
     @Override
     protected void doInBackground() throws IOException {
-        Log.d("Calendar", "asyncloadtasks");
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = client.events().list("primary")
                 .setMaxResults(10)
@@ -44,12 +40,9 @@ class AsyncLoadTasks extends CommonAsyncTask {
                 .setSingleEvents(true)
                 .execute();
         activity.items = events.getItems();
-        for (Event event : activity.items) {
-            Log.d("Calendar", event.getSummary());
-        }
     }
 
-    static void run(CalendarActivity tasksSample) {
+    static void run(CreateEventActivity tasksSample) {
         new AsyncLoadTasks(tasksSample).execute();
     }
 }

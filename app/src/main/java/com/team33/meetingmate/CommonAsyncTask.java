@@ -30,11 +30,11 @@ import java.io.IOException;
  */
 abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-    final CalendarActivity activity;
+    final CreateEventActivity activity;
     final com.google.api.services.calendar.Calendar client;
     //private final View progressBar;
 
-    CommonAsyncTask(CalendarActivity activity) {
+    CommonAsyncTask(CreateEventActivity activity) {
         this.activity = activity;
         client = activity.service;
         //progressBar = activity.findViewById(R.id.title_refresh_progress);
@@ -53,14 +53,12 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
             doInBackground();
             return true;
         } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
-            Log.d("Calendar", "Google Play Service Unavailable");
             activity.showGooglePlayServicesAvailabilityErrorDialog(
                     availabilityException.getConnectionStatusCode());
         } catch (UserRecoverableAuthIOException userRecoverableException) {
             activity.startActivityForResult(
-                    userRecoverableException.getIntent(), CalendarActivity.REQUEST_AUTHORIZATION);
+                    userRecoverableException.getIntent(), CreateEventActivity.REQUEST_AUTHORIZATION);
         } catch (IOException e) {
-            //Utils.logAndShow(activity, CalendarActivity.TAG, e);
             Log.d("Calendar", "IOException");
         }
         return false;
