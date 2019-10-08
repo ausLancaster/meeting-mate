@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -31,12 +32,15 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,13 +70,15 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private java.util.Calendar calendar;
     private TextView dateView;
-    private int year, month, day, hour, min;
+    private int year, month, day, startHour, startMin, endHour, endMin;
 
-    private TextView time;
+    private TextView startTime;
+    private TextView endTime;
     private String format = "";
 
-    private TextView location;
-    private Place place;
+    private Place selectedPlace;
+
+    public Event event;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,11 +93,15 @@ public class CreateEventActivity extends AppCompatActivity {
         day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
         showDate(year, month+1, day);
 
-        time = findViewById(R.id.textView4);
+        startTime = findViewById(R.id.textView4);
+        endTime = findViewById(R.id.textView7);
 
-        hour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
-        min = calendar.get(java.util.Calendar.MINUTE);
-        showTime(hour, min);
+        startHour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+        startMin = calendar.get(java.util.Calendar.MINUTE);
+        endHour = startHour + 1;
+        endMin = startMin;
+        showTime(startTime, startHour, startMin);
+        showTime(endTime, endHour, endMin);
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.GET_ACCOUNTS},
@@ -105,8 +115,6 @@ public class CreateEventActivity extends AppCompatActivity {
                 new Calendar.Builder(httpTransport, jsonFactory, credential)
                         .setApplicationName(APPLICATION_NAME)
                         .build();
-
-        location = findViewById(R.id.textView5);
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), getString(R.string.api_key), Locale.US);
@@ -123,14 +131,12 @@ public class CreateEventActivity extends AppCompatActivity {
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
                 Log.i("Calendar", "Place: " + place.getName() + ", " + place.getId());
-
+                selectedPlace = place;
             }
 
             @Override
             public void onError(Status status) {
-                // TODO: Handle the error.
                 Log.i("Calendar", "An error occurred: " + status);
             }
         });
@@ -150,7 +156,9 @@ public class CreateEventActivity extends AppCompatActivity {
             return new DatePickerDialog(this,
                     myDateListener, year, month, day);
         } else if (id == 998) {
-            return new TimePickerDialog(this, myTimeListener, hour, min, false);
+            return new TimePickerDialog(this, myStartTimeListener, startHour, startMin, false);
+        } else if (id == 997) {
+            return new TimePickerDialog(this, myEndTimeListener, endHour, endMin, false);
         }
         return null;
     }
@@ -164,10 +172,17 @@ public class CreateEventActivity extends AppCompatActivity {
                 }
             };
 
-    private TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
+    private TimePickerDialog.OnTimeSetListener myStartTimeListener = new TimePickerDialog.OnTimeSetListener() {
         @Override
         public void onTimeSet(TimePicker timePicker, int i, int i1) {
-            showTime(i, i1);
+            showTime(startTime, i, i1);
+        }
+    };
+
+    private TimePickerDialog.OnTimeSetListener myEndTimeListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            showTime(endTime, i, i1);
         }
     };
 
@@ -176,11 +191,14 @@ public class CreateEventActivity extends AppCompatActivity {
                 .append(month).append("/").append(year));
     }
 
-    public void setTime(View view) {
+    public void setStartTime(View view) {
         showDialog(998);
     }
+    public void setEndTime(View view) {
+        showDialog(997);
+    }
 
-    public void showTime(int hour, int min) {
+    public void showTime(TextView timeTextView, int hour, int min) {
         if (hour == 0) {
             hour += 12;
             format = "AM";
@@ -193,7 +211,7 @@ public class CreateEventActivity extends AppCompatActivity {
             format = "AM";
         }
 
-        time.setText(new StringBuilder().append(hour).append(" : ").append(min)
+        timeTextView.setText(new StringBuilder().append(hour).append(" : ").append(min)
                 .append(" ").append(format));
     }
 
@@ -247,6 +265,35 @@ public class CreateEventActivity extends AppCompatActivity {
         if (checkGooglePlayServicesAvailable()) {
             haveGooglePlayServices();
         }
+    }
+
+    public void createEvent(View view) {
+
+        EditText editName = findViewById(R.id.editText);
+        event = new Event()
+            .setSummary(editName.getText().toString());
+
+        if (selectedPlace != null) {
+            event.setLocation(selectedPlace.toString());
+        }
+
+        Date startDate = new Date(year, month, day, startHour, endHour);
+        DateTime startDateTime = new DateTime(startDate);
+        EventDateTime start = new EventDateTime()
+                .setDateTime(startDateTime)
+                .setTimeZone("Australia/Melbourne");
+        event.setStart(start);
+
+        Date endDate = new Date(year, month, day, startHour, endHour);
+        DateTime endDateTime = new DateTime(endDate);
+        EventDateTime end = new EventDateTime()
+                .setDateTime(endDateTime)
+                .setTimeZone("Australia/Melbourne");
+        event.setEnd(end);
+        AsyncInsertEvent.run(this);
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
     @Override
