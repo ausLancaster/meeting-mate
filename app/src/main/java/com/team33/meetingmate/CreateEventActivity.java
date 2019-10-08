@@ -21,6 +21,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
@@ -30,8 +35,10 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 
 public class CreateEventActivity extends AppCompatActivity {
@@ -57,21 +64,22 @@ public class CreateEventActivity extends AppCompatActivity {
 
     int numAsyncTasks;
 
-    private DatePicker datePicker;
     private java.util.Calendar calendar;
     private TextView dateView;
     private int year, month, day, hour, min;
 
-    private TimePicker timePicker1;
     private TextView time;
     private String format = "";
+
+    private TextView location;
+    private Place place;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_create_event);
 
-        dateView = (TextView) findViewById(R.id.textView2);
+        dateView = findViewById(R.id.textView2);
         calendar = java.util.Calendar.getInstance();
         year = calendar.get(java.util.Calendar.YEAR);
 
@@ -79,7 +87,7 @@ public class CreateEventActivity extends AppCompatActivity {
         day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
         showDate(year, month+1, day);
 
-        time = (TextView) findViewById(R.id.textView4);
+        time = findViewById(R.id.textView4);
 
         hour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
         min = calendar.get(java.util.Calendar.MINUTE);
@@ -97,6 +105,35 @@ public class CreateEventActivity extends AppCompatActivity {
                 new Calendar.Builder(httpTransport, jsonFactory, credential)
                         .setApplicationName(APPLICATION_NAME)
                         .build();
+
+        location = findViewById(R.id.textView5);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), getString(R.string.api_key), Locale.US);
+        }
+
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                Log.i("Calendar", "Place: " + place.getName() + ", " + place.getId());
+
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("Calendar", "An error occurred: " + status);
+            }
+        });
     }
 
     public void setDate(View view) {
