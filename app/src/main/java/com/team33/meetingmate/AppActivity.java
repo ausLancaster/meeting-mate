@@ -18,11 +18,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.annotation.RequiresApi;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -34,8 +41,12 @@ import java.util.TimeZone;
 
 public class AppActivity extends AppCompatActivity {
 
-    private static final Integer ATTACH_FILE_RESULT_CODE = 1;
     private static final String TAG = "AppActivity";
+    private final static int CAMERA_RESULT_REQUEST_CODE = 100;
+    private final static int CAMERA_PERMISSION_REQUEST_CODE = 101;
+    private final static int AUDIO_RECODING_PERMISSION_REQUEST_CODE = 102;
+    private final static int DOCUMENT_RESULT_REQUEST_CODE = 103;
+    private final static int AUDIO_RECORDING_RESULT_REQUEST_CODE = 104;
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -93,12 +104,29 @@ public class AppActivity extends AppCompatActivity {
         // Document
         fabAddDocument.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
+                closeFABMenu();
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("file/*");
-                intent.putExtra("CONTENT_TYPE", "*/*");
-                intent.addCategory(Intent.CATEGORY_DEFAULT);
-                startActivityForResult(intent, ATTACH_FILE_RESULT_CODE);
+                intent.setType("*/*");
+                startActivityForResult(intent, DOCUMENT_RESULT_REQUEST_CODE);
+            }
+        });
+
+        fabMic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                if (ContextCompat.checkSelfPermission(AppActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(
+                            AppActivity.this,
+                            new String[]{Manifest.permission.RECORD_AUDIO},
+                            AUDIO_RECODING_PERMISSION_REQUEST_CODE);
+                } else {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, AUDIO_RECORDING_RESULT_REQUEST_CODE);
+                }
             }
         });
 
@@ -108,9 +136,9 @@ public class AppActivity extends AppCompatActivity {
             @Override
             public void onLocationChanged(Location loc) {
                 setLocation(loc);
-                String lat = Double.toString(loc.getLongitude());
-                String lng = Double.toString(loc.getLatitude());
-                Toast.makeText(getBaseContext(), "Location: {Lat: " + lat + ", Lng: " + lng + "}", Toast.LENGTH_SHORT).show();
+//                String lat = Double.toString(loc.getLongitude());
+//                String lng = Double.toString(loc.getLatitude());
+//                Toast.makeText(getBaseContext(), "Location: {Lat: " + lat + ", Lng: " + lng + "}", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -133,15 +161,12 @@ public class AppActivity extends AppCompatActivity {
             Boolean gpsEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.GPS_PROVIDER);
             Boolean networkEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.NETWORK_PROVIDER);
 
-            if (gpsEnabled) {
-                // Location GPS Provider enabled
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-            } else if (networkEnabled) {
-                // Location Network Provider enabled
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-            } else {
+            if (!gpsEnabled && !networkEnabled){
                 // No location provider enabled
                 Toast.makeText(getBaseContext(), "Unable to fetch location", Toast.LENGTH_SHORT).show();
+            } else {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
             }
         }
 
@@ -198,13 +223,71 @@ public class AppActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == ATTACH_FILE_RESULT_CODE) {
-            String filePath = data.getData().getPath();
-            Log.d(TAG, "File: " + filePath);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_RESULT_REQUEST_CODE);
+                } else {
+                    Toast.makeText(this, "Camera permission denied", Toast.LENGTH_LONG)
+                            .show();
+                }
+                break;
+            case AUDIO_RECODING_PERMISSION_REQUEST_CODE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, AUDIO_RECORDING_RESULT_REQUEST_CODE);
+                } else {
+                    Toast.makeText(this, "Audio recoding permission denied", Toast.LENGTH_LONG)
+                            .show();
+                }
         }
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case CAMERA_RESULT_REQUEST_CODE:
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    Toast.makeText(this, "got image " + photo.getHeight() + "x" + photo.getWidth(), Toast.LENGTH_LONG).show();
+                    break;
+                case DOCUMENT_RESULT_REQUEST_CODE:
+                    String filePath = data.getData().getPath();
+                    Toast.makeText(this, "got document from " + filePath, Toast.LENGTH_LONG).show();
+                    break;
+                case AUDIO_RECORDING_RESULT_REQUEST_CODE:
+                    Uri audioUri = data.getData();
+                    Toast.makeText(this, "got audio from uri: " + audioUri, Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+        fabCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                if (ContextCompat.checkSelfPermission(AppActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(
+                            AppActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            CAMERA_PERMISSION_REQUEST_CODE);
+                } else {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_RESULT_REQUEST_CODE);
+                }
+            }
+        });
+    }
+
 
     private void showFABMenu() {
         isFabOpen = true;
@@ -237,11 +320,10 @@ public class AppActivity extends AppCompatActivity {
     }
 
     public Location getLocation() {
-        return this.location;
+        return location;
     }
-
-    public void setLocation(Location location) {
-        this.location = location;
+    public void setLocation(Location loc) {
+        location = loc;
     }
 
     public BluetoothAdapter getBluetoothAdapter() {

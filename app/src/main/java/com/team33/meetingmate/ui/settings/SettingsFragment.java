@@ -33,6 +33,10 @@ public class SettingsFragment extends Fragment {
 
     private SettingsViewModel settingsViewModel;
     private AppActivity activity;
+    private View view;
+
+    private TextView textTime;
+    private TextView textLocation;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -53,61 +57,65 @@ public class SettingsFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        View v = getView();
+        view = getView();
         activity = ((AppActivity) getActivity());
 
-        ListView listDevices = (ListView) v.findViewById(R.id.list_devices);
-        listDevices.setAdapter(activity.getBluetoothArrayAdapter());
+//        ListView listDevices = (ListView) v.findViewById(R.id.list_devices);
+//        listDevices.setAdapter(activity.getBluetoothArrayAdapter());
 
-        Button btnONOFF = (Button) v.findViewById(R.id.btnONOFF);
-        btnONOFF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: enabling/disabling bluetooth.");
-//                enableDisableBT();
-                scanForDevices();
-            }
-        });
+//        Button btnONOFF = (Button) v.findViewById(R.id.btnONOFF);
+//        btnONOFF.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Log.d(TAG, "onClick: enabling/disabling bluetooth.");
+//                scanForDevices();
+//            }
+//        });
 
-        TextView textTime = (TextView) v.findViewById(R.id.text_time);
+        textTime = view.findViewById(R.id.text_time);
         textTime.setText(activity.getTime() == null ? "" : activity.getTime().toString());
 
-        TextView textLocation = (TextView) v.findViewById(R.id.text_location);
-        textLocation.setText(activity.getLocation() == null ? "" : activity.getLocation().toString());
+        textLocation = view.findViewById(R.id.text_location);
+        textLocation.setText(activity.getLocation() == null ? "" : "Lat: " + Double.toString(activity.getLocation().getLatitude()) + ", Lng: " + Double.toString(activity.getLocation().getLongitude()));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), BTIntent);
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
+
+        textTime.setText(activity.getTime() == null ? "" : activity.getTime().toString());
+        textLocation.setText(activity.getLocation() == null ? "" : "Lat: " + Double.toString(activity.getLocation().getLatitude()) + ", Lng: " + Double.toString(activity.getLocation().getLongitude()));
+//        textLocation.setText(activity.getLocation() == null ? "" : activity.getLocation().toString());
+
+//        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+//        LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), BTIntent);
+//        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+//        LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(activity).unregisterReceiver(activity.getBluetoothBroadcastReceiver());
+//        LocalBroadcastManager.getInstance(activity).unregisterReceiver(activity.getBluetoothBroadcastReceiver());
     }
 
-    public void scanForDevices() {
-        if (activity.getBluetoothAdapter() == null) {
-            Log.d(TAG, "Does not have BT capabilities.");
-        } else {
-            if (!activity.getBluetoothAdapter().isEnabled()) {
-                Log.d(TAG, "Enabling BT.");
-                Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivity(enableBTIntent);
-
-                IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-                LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), BTIntent);
-            }
-            Log.d(TAG, "Scanning for devices");
-
-            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
-        }
-    }
+//    public void scanForDevices() {
+//        if (activity.getBluetoothAdapter() == null) {
+//            Log.d(TAG, "Does not have BT capabilities.");
+//        } else {
+//            if (!activity.getBluetoothAdapter().isEnabled()) {
+//                Log.d(TAG, "Enabling BT.");
+//                Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                startActivity(enableBTIntent);
+//
+//                IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+//                LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), BTIntent);
+//            }
+//            Log.d(TAG, "Scanning for devices");
+//
+//            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+//            LocalBroadcastManager.getInstance(activity).registerReceiver(activity.getBluetoothBroadcastReceiver(), filter);
+//        }
+//    }
 
 }

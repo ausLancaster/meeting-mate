@@ -44,8 +44,5 @@ public class FilesFragment extends Fragment {
 
         view = getView();
         activity = ((AppActivity) getActivity());
-
-        ListView listDevices = (ListView) view.findViewById(R.id.list_files);
-        listDevices.setAdapter(activity.getFileArrayAdapter());
     }
 }
