@@ -292,7 +292,7 @@ public class CreateEventActivity extends AppCompatActivity {
         event.setEnd(end);
         AsyncInsertEvent.run(this);
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, AppActivity.class);
         startActivity(intent);
     }
 

@@ -11,23 +11,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Main2Activity"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
             android:name=".CreateEventActivity"
             android:label="@string/title_activity_calendar"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".LauncherActivity" />
         <activity
             android:name=".AppActivity"
-            android:label="@string/title_activity_app" />
+            android:label="@string/title_activity_app">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.authentication.LoginActivity" />
         <activity android:name=".ui.authentication.RegistrationActivity" />
