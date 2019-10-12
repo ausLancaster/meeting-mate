@@ -52,7 +52,9 @@ public class CustomBottomNavigationView extends BottomNavigationView {
     private void init() {
         mPath = new Path();
         mPaint = new Paint();
-        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mPaint.setColor(Color.rgb(63, 81, 181));
+        mPaint.setStrokeWidth(2);
         setBackgroundColor(Color.TRANSPARENT);
     }
 
@@ -70,12 +72,15 @@ public class CustomBottomNavigationView extends BottomNavigationView {
         mNavigationBarWidth = getWidth();
         mNavigationBarHeight = getHeight();
         // the coordinates (x,y) of the start point before curve
-        mFirstCurveStartPoint.set((mNavigationBarWidth / 2) - (CURVE_CIRCLE_RADIUS * 2) - (CURVE_CIRCLE_RADIUS / 3), 0);
+//        mFirstCurveStartPoint.set((mNavigationBarWidth / 2) - (CURVE_CIRCLE_RADIUS * 2) - (CURVE_CIRCLE_RADIUS / 3), 0);
+        mFirstCurveStartPoint.set((mNavigationBarWidth / 2) - (CURVE_CIRCLE_RADIUS * 2) + (CURVE_CIRCLE_RADIUS / 2), 0);
         // the coordinates (x,y) of the end point after curve
-        mFirstCurveEndPoint.set(mNavigationBarWidth / 2, CURVE_CIRCLE_RADIUS + (CURVE_CIRCLE_RADIUS / 4));
+//        mFirstCurveEndPoint.set(mNavigationBarWidth / 2, CURVE_CIRCLE_RADIUS + (CURVE_CIRCLE_RADIUS / 4));
+        mFirstCurveEndPoint.set(mNavigationBarWidth / 2, (CURVE_CIRCLE_RADIUS / 2) + (CURVE_CIRCLE_RADIUS / 8));
         // same thing for the second curve
         mSecondCurveStartPoint = mFirstCurveEndPoint;
-        mSecondCurveEndPoint.set((mNavigationBarWidth / 2) + (CURVE_CIRCLE_RADIUS * 2) + (CURVE_CIRCLE_RADIUS / 3), 0);
+//        mSecondCurveEndPoint.set((mNavigationBarWidth / 2) + (CURVE_CIRCLE_RADIUS * 2) + (CURVE_CIRCLE_RADIUS / 3), 0);
+        mSecondCurveEndPoint.set((mNavigationBarWidth / 2) + (CURVE_CIRCLE_RADIUS * 2) - (CURVE_CIRCLE_RADIUS / 2), 0);
 
         // the coordinates (x,y)  of the 1st control point on a cubic curve
         mFirstCurveControlPoint1.set(mFirstCurveStartPoint.x + CURVE_CIRCLE_RADIUS + (CURVE_CIRCLE_RADIUS / 4), mFirstCurveStartPoint.y);

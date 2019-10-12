@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -12,11 +13,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.team33.meetingmate.AppActivity;
 import com.team33.meetingmate.R;
 
 public class FilesFragment extends Fragment {
 
     private FilesViewModel filesViewModel;
+    private View view;
+    private AppActivity activity;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -31,5 +36,13 @@ public class FilesFragment extends Fragment {
             }
         });
         return root;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        view = getView();
+        activity = ((AppActivity) getActivity());
     }
 }
