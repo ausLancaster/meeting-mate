@@ -129,6 +129,13 @@ public class AppActivity extends AppCompatActivity {
             }
         });
 
+        fabCreateMeeting.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+              Intent intent = new Intent(AppActivity.this, CreateEventActivity.class);
+              startActivity(intent);
+          }
+      });
         // Location services
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {

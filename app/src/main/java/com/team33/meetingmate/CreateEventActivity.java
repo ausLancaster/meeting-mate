@@ -80,7 +80,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private TextView startTime;
     private TextView endTime;
-    private String format = "";
 
     private Place selectedPlace;
 
@@ -205,20 +204,17 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     public void showTime(TextView timeTextView, int hour, int min) {
-        if (hour == 0) {
-            hour += 12;
-            format = "AM";
-        } else if (hour == 12) {
-            format = "PM";
-        } else if (hour > 12) {
-            hour -= 12;
-            format = "PM";
-        } else {
-            format = "AM";
-        }
 
-        timeTextView.setText(new StringBuilder().append(hour).append(" : ").append(min)
-                .append(" ").append(format));
+        if (timeTextView == startTime) {
+            Log.d("Calendar", "set start time");
+            startHour = hour;
+            startMin = min;
+        } else {
+            Log.d("Calendar", "set end time");
+            endHour = hour;
+            endMin = min;
+        }
+        timeTextView.setText(TimeUtility.formatTime(new Date(year, month, day, hour, min)));
     }
 
 
@@ -290,7 +286,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 .setTimeZone("Australia/Melbourne");
         event.setStart(start);
 
-        Date endDate = new Date(year, month, day, startHour, endMin);
+        Date endDate = new Date(year, month, day, endHour, endMin);
         DateTime endDateTime = new DateTime(endDate);
         EventDateTime end = new EventDateTime()
                 .setDateTime(endDateTime)
@@ -309,13 +305,8 @@ public class CreateEventActivity extends AppCompatActivity {
         if (selectedPlace != null) {
             eventData.put("place", selectedPlace.toString());
         }
-        eventData.put("startHour", startHour);
-        eventData.put("endHour", endHour);
-        eventData.put("startMin", startMin);
-        eventData.put("endMin", endMin);
-        eventData.put("year", year);
-        eventData.put("month", month);
-        eventData.put("day", day);
+        eventData.put("startDate", startDate.getTime());
+        eventData.put("endDate", endDate.getTime());
 
         db.collection("events")
                 .document(event.getId())

@@ -8,7 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.team33.meetingmate.R;
+import com.team33.meetingmate.TimeUtility;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,8 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
         TextView startTime;
         @BindView(R.id.listevent_endtime)
         TextView endTime;
+        @BindView(R.id.listevent_date)
+        TextView date;
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);
@@ -62,8 +66,10 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
 
         viewHolder.title.setText((String) eventData.get("summary"));
         viewHolder.location.setText((String) eventData.get("location"));
-        viewHolder.startTime.setText(eventData.get("startHour").toString() + ":" + eventData.get("startMin").toString());
-        viewHolder.endTime.setText(eventData.get("endHour").toString() + ":" + eventData.get("endMin").toString());
+        Date startDate = new Date((long) eventData.get("startDate"));
+        viewHolder.startTime.setText(TimeUtility.formatTime(startDate));
+        viewHolder.endTime.setText(TimeUtility.formatTime(new Date((long) eventData.get("endDate"))));
+        viewHolder.date.setText(TimeUtility.formatDate(startDate));
 
         return view;
     }
