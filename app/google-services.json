@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "435806940726-kc64nh1lun68mvesdbgoqg459ngatb08.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team33.meetingmate",
+            "certificate_hash": "3ea6e4bf2bfdd153f49502198bf0c7179703e01d"
+          }
+        },
+        {
+          "client_id": "435806940726-9ifhhpdo1s23iuok3tastubqmsucmusi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team33.meetingmate",
+            "certificate_hash": "2564ef02bc0b096e8198e32270713d1e04e9aa50"
+          }
+        },
+        {
           "client_id": "435806940726-3t957spuv339o9cj589297rags77t3al.apps.googleusercontent.com",
           "client_type": 3
         }

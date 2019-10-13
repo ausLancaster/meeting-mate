@@ -11,10 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -22,9 +24,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.team33.meetingmate.R;
 
-import static android.content.ContentValues.TAG;
-
 public class SettingsFragment extends Fragment {
+
+    public static boolean syncCalendar = true;
 
     private static final String TAG = "AppActivity";
 
@@ -87,6 +89,13 @@ public class SettingsFragment extends Fragment {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: enabling/disabling bluetooth.");
                 enableDisableBT();
+            }
+        });
+
+        Switch syncONOFF = v.findViewById(R.id.switch2);
+        syncONOFF.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                syncCalendar = isChecked;
             }
         });
     }

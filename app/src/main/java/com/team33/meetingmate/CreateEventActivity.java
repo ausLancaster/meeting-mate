@@ -18,11 +18,14 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -37,6 +40,9 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.team33.meetingmate.ui.settings.SettingsFragment;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -290,7 +296,25 @@ public class CreateEventActivity extends AppCompatActivity {
                 .setDateTime(endDateTime)
                 .setTimeZone("Australia/Melbourne");
         event.setEnd(end);
-        AsyncInsertEvent.run(this);
+        if (SettingsFragment.syncCalendar) {
+            AsyncInsertEvent.run(this);
+        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("events")
+                .add(event)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("Calendar", "DocumentSnapshot added with ID: " + documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w("Calendar", e.getMessage(), e);
+            }
+        });;
 
         Intent intent = new Intent(this, AppActivity.class);
         startActivity(intent);
