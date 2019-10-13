@@ -1,6 +1,7 @@
 package com.team33.meetingmate.ui.calendar;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,12 +36,15 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
         }
     }
 
+    private Context context;
+
     private Date previousDate;
 
     private int resourceId;
 
     public CalendarAdapter(Context context, int resource, List<Map<String, Object>> objects) {
         super(context, resource, objects);
+        this.context = context;
         resourceId = resource;
     }
 
@@ -58,13 +62,14 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-//        Set onClick listener - method 2
-//        view.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Toast.makeText(getContext(), ((ViewHolder) view.getTag()).text.getText(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EventActivity.class);
+                intent.putExtra("EventID", (long) eventData.get("id"));
+                context.startActivity(intent);
+            }
+        });
 
         viewHolder.title.setText((String) eventData.get("summary"));
         viewHolder.location.setText((String) eventData.get("location"));

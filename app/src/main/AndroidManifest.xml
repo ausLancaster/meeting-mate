@@ -48,6 +48,7 @@
         <activity android:name=".ui.authentication.LoginActivity" />
         <activity android:name=".ui.authentication.RegistrationActivity" />
         <activity android:name=".ui.authentication.ForgotPasswordActivity" />
+        <activity android:name=".ui.calendar.EventActivity" />
     </application>
 
     <uses-feature android:name="android.hardware.bluetooth" />

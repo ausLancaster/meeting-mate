@@ -293,7 +293,6 @@ public class CreateEventActivity extends AppCompatActivity {
                 .setTimeZone("Australia/Melbourne");
         event.setEnd(end);
         event.setId(Integer.toString(eventId));
-        eventId++;
         if (SettingsFragment.syncCalendar) {
             AsyncInsertEvent.run(this);
         }
@@ -307,6 +306,9 @@ public class CreateEventActivity extends AppCompatActivity {
         }
         eventData.put("startDate", startDate.getTime());
         eventData.put("endDate", endDate.getTime());
+        eventData.put("id", eventId);
+
+        eventId++;
 
         db.collection("events")
                 .document(event.getId())

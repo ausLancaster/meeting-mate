@@ -132,6 +132,7 @@ public class AppActivity extends AppCompatActivity {
         fabCreateMeeting.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
+              closeFABMenu();
               Intent intent = new Intent(AppActivity.this, CreateEventActivity.class);
               startActivity(intent);
           }

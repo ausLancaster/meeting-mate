@@ -10,6 +10,7 @@
         android:name="com.team33.meetingmate.ui.calendar.EventListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="40pt"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="170dp"/>
 
