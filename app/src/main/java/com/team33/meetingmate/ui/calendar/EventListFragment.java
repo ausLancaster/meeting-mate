@@ -18,6 +18,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.team33.meetingmate.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,11 @@ public class EventListFragment extends Fragment {
                                 calendarList.add(document.getData());
                                 Log.d("Calendar", document.getId() + " => " + document.getData());
                             }
+                            Collections.sort(
+                                    calendarList,
+                                    (Map<String, Object> e1, Map<String, Object> e2) ->
+                                            Long.compare((long)e1.get("startDate"), (long)e2.get("startDate"))
+                            );
                             CalendarAdapter adapter = new CalendarAdapter(getActivity(), R.layout.event_list_item, calendarList);
                             ListView listView = view.findViewById(R.id.calendar_list_view);
                             listView.setAdapter(adapter);
@@ -64,4 +70,6 @@ public class EventListFragment extends Fragment {
 
         return view;
     }
+
+
 }

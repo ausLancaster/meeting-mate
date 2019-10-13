@@ -35,6 +35,8 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
         }
     }
 
+    private Date previousDate;
+
     private int resourceId;
 
     public CalendarAdapter(Context context, int resource, List<Map<String, Object>> objects) {
@@ -67,9 +69,17 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
         viewHolder.title.setText((String) eventData.get("summary"));
         viewHolder.location.setText((String) eventData.get("location"));
         Date startDate = new Date((long) eventData.get("startDate"));
+        // only show date if it is different from the previous event (so that events in same day are grouped together)
+        if (previousDate != null &&
+                startDate.getYear() == previousDate.getYear() &&
+                startDate.getMonth() == previousDate.getMonth() &&
+                startDate.getDay() == previousDate.getDay()) {
+            viewHolder.date.setVisibility(View.GONE);
+        }
         viewHolder.startTime.setText(TimeUtility.formatTime(startDate));
         viewHolder.endTime.setText(TimeUtility.formatTime(new Date((long) eventData.get("endDate"))));
         viewHolder.date.setText(TimeUtility.formatDate(startDate));
+        previousDate = startDate;
 
         return view;
     }
