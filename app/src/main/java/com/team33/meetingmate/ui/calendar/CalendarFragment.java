@@ -25,7 +25,7 @@ public class CalendarFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         calendarViewModel =
                 ViewModelProviders.of(this).get(CalendarViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_calendar, container, false);
+        final View root = inflater.inflate(R.layout.fragment_calendar, container, false);
         final TextView textView = root.findViewById(R.id.text_calendar);
         calendarViewModel.getText().observe(this, new Observer<String>() {
             @Override
@@ -36,6 +36,7 @@ public class CalendarFragment extends Fragment {
 
         Button b = root.findViewById(R.id.button);
         b.setOnClickListener(mButtonClickListener);
+
 
         return root;
     }

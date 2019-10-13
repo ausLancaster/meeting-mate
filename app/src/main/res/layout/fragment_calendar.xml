@@ -5,13 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <fragment
+        android:id="@+id/fragment_event_list"
+        android:name="com.team33.meetingmate.ui.calendar.EventListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="200dp"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="170dp"></fragment>
+
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="144dp"
         android:layout_marginLeft="144dp"
-        android:layout_marginTop="348dp"
+        android:layout_marginTop="600dp"
         android:text="Create Event"
         android:onClick="goToCreateEvent"
         app:layout_constraintEnd_toEndOf="parent"

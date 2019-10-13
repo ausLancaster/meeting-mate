@@ -18,14 +18,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -40,18 +37,21 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team33.meetingmate.ui.settings.SettingsFragment;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class CreateEventActivity extends AppCompatActivity {
+
+    private static int eventId = 0;
 
     private static final String PREF_ACCOUNT_NAME = "accountName";
 
@@ -283,38 +283,43 @@ public class CreateEventActivity extends AppCompatActivity {
             event.setLocation(selectedPlace.toString());
         }
 
-        Date startDate = new Date(year, month, day, startHour, endHour);
+        Date startDate = new Date(year, month, day, startHour, startMin);
         DateTime startDateTime = new DateTime(startDate);
         EventDateTime start = new EventDateTime()
                 .setDateTime(startDateTime)
                 .setTimeZone("Australia/Melbourne");
         event.setStart(start);
 
-        Date endDate = new Date(year, month, day, startHour, endHour);
+        Date endDate = new Date(year, month, day, startHour, endMin);
         DateTime endDateTime = new DateTime(endDate);
         EventDateTime end = new EventDateTime()
                 .setDateTime(endDateTime)
                 .setTimeZone("Australia/Melbourne");
         event.setEnd(end);
+        event.setId(Integer.toString(eventId));
+        eventId++;
         if (SettingsFragment.syncCalendar) {
             AsyncInsertEvent.run(this);
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("summary", editName.getText().toString());
+        if (selectedPlace != null) {
+            eventData.put("place", selectedPlace.toString());
+        }
+        eventData.put("startHour", startHour);
+        eventData.put("endHour", endHour);
+        eventData.put("startMin", startMin);
+        eventData.put("endMin", endMin);
+        eventData.put("year", year);
+        eventData.put("month", month);
+        eventData.put("day", day);
+
         db.collection("events")
-                .add(event)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("Calendar", "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w("Calendar", e.getMessage(), e);
-            }
-        });;
+                .document(event.getId())
+                .set(eventData);
 
         Intent intent = new Intent(this, AppActivity.class);
         startActivity(intent);
