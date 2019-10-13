@@ -10,7 +10,7 @@ public class FilesViewModel extends ViewModel {
 
     public FilesViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is files fragment");
+        mText.setValue("Files");
     }
 
     public LiveData<String> getText() {

@@ -6,7 +6,6 @@ import android.annotation.TargetApi;
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.biometrics.BiometricManager;
 import android.os.Bundle;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -15,7 +14,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.team33.meetingmate.ui.FingerprintHandler;
 import com.team33.meetingmate.ui.authentication.LoginActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -107,9 +105,12 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             keyStore.load(null);
-            SecretKey key = (SecretKey)keyStore.getKey(KEY_NAME,null);
-            cipher.init(Cipher.ENCRYPT_MODE,key);
+            SecretKey key = (SecretKey) keyStore.getKey(KEY_NAME, null);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
             return true;
+        } catch (NullPointerException e1) {
+            e1.printStackTrace();
+            return false;
         } catch (IOException e1) {
 
             e1.printStackTrace();
