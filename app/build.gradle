@@ -41,6 +41,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:21.1.1'
     implementation 'androidx.navigation:navigation-fragment:2.1.0'
     implementation 'androidx.navigation:navigation-ui:2.1.0'//Cloud Firestore
+    implementation 'com.google.firebase:firebase-storage:19.1.0' //Firebase storage
 
     // Google Calendar
     implementation fileTree(dir: 'libs', include: ['*.jar'])

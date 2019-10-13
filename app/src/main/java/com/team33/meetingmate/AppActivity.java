@@ -33,10 +33,18 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class AppActivity extends AppCompatActivity {
@@ -47,6 +55,7 @@ public class AppActivity extends AppCompatActivity {
     private final static int AUDIO_RECODING_PERMISSION_REQUEST_CODE = 102;
     private final static int DOCUMENT_RESULT_REQUEST_CODE = 103;
     private final static int AUDIO_RECORDING_RESULT_REQUEST_CODE = 104;
+    private final static String ATTACHMENT_IMAGE_REF = "attachments";
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -63,6 +72,8 @@ public class AppActivity extends AppCompatActivity {
     private ArrayAdapter<String> bluetoothArrayAdapter;
 
     private ArrayAdapter<String> fileArrayAdapter;
+
+    private StorageReference mStorage;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -82,6 +93,9 @@ public class AppActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
+        // Firebase storage
+        mStorage = FirebaseStorage.getInstance().getReference();
+
         // FAB buttons
         FloatingActionButton fab = findViewById(R.id.fab_plus);
         fabCamera = findViewById(R.id.fab_camera);
@@ -100,7 +114,35 @@ public class AppActivity extends AppCompatActivity {
             }
         });
 
-        // Document
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isFabOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
+            }
+        });
+
+        fabCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                if (ContextCompat.checkSelfPermission(AppActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(
+                            AppActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            CAMERA_PERMISSION_REQUEST_CODE);
+                } else {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_RESULT_REQUEST_CODE);
+                }
+            }
+        });
+
         fabAddDocument.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,7 +210,7 @@ public class AppActivity extends AppCompatActivity {
             Boolean gpsEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.GPS_PROVIDER);
             Boolean networkEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.NETWORK_PROVIDER);
 
-            if (!gpsEnabled && !networkEnabled){
+            if (!gpsEnabled && !networkEnabled) {
                 // No location provider enabled
                 Toast.makeText(getBaseContext(), "Unable to fetch location", Toast.LENGTH_SHORT).show();
             } else {
@@ -200,7 +242,7 @@ public class AppActivity extends AppCompatActivity {
                 else if (action.equals(bluetoothAdapter.ACTION_STATE_CHANGED)) {
                     final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, bluetoothAdapter.ERROR);
 
-                    switch(state){
+                    switch (state) {
                         case BluetoothAdapter.STATE_OFF:
                             Log.d(TAG, "Bluetooth: STATE OFF");
                             break;
@@ -260,19 +302,30 @@ public class AppActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // TODO: use the real meeting ID later
+        String eventId = "222";
+
+        SimpleDateFormat m_sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH);
+        String timestamp = m_sdf.format(new Date());
+
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case CAMERA_RESULT_REQUEST_CODE:
                     Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    Toast.makeText(this, "got image " + photo.getHeight() + "x" + photo.getWidth(), Toast.LENGTH_LONG).show();
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    assert photo != null;
+                    photo.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    uploadByteArray(stream.toByteArray(), eventId, timestamp + ".png");
                     break;
                 case DOCUMENT_RESULT_REQUEST_CODE:
-                    String filePath = data.getData().getPath();
-                    Toast.makeText(this, "got document from " + filePath, Toast.LENGTH_LONG).show();
+                    Uri uri = data.getData();
+                    String fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
+                    uploadFile(uri, eventId, fileName);
                     break;
                 case AUDIO_RECORDING_RESULT_REQUEST_CODE:
                     Uri audioUri = data.getData();
-                    Toast.makeText(this, "got audio from uri: " + audioUri, Toast.LENGTH_LONG).show();
+                    fileName = audioUri.getLastPathSegment() == null ? timestamp : audioUri.getLastPathSegment();
+                    uploadFile(audioUri, eventId, fileName);
                     break;
             }
         }
@@ -294,7 +347,6 @@ public class AppActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void showFABMenu() {
         isFabOpen = true;
@@ -318,6 +370,42 @@ public class AppActivity extends AppCompatActivity {
         fabCreateMeeting.animate().translationY(0).translationX(0);
     }
 
+    private void uploadFile(Uri uri, String eventID, String fileName) {
+        StorageReference mountainsRef = mStorage.child(ATTACHMENT_IMAGE_REF).child(eventID).child(fileName);
+
+        UploadTask uploadTask = mountainsRef.putFile(uri);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.d(TAG, "onFailure: " + exception.getMessage());
+                Toast.makeText(AppActivity.this, "Failed to attached file.", Toast.LENGTH_LONG).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(AppActivity.this, "Successfully attached file.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void uploadByteArray(byte[] data, String meetingID, final String fileName) {
+        StorageReference mountainsRef = mStorage.child(ATTACHMENT_IMAGE_REF).child(meetingID).child(fileName);
+
+        UploadTask uploadTask = mountainsRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.d(TAG, "onFailure: " + exception.getMessage());
+                Toast.makeText(AppActivity.this, "Failed to attached file.", Toast.LENGTH_LONG).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(AppActivity.this, "Successfully attached file.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     public Date getTime() {
         return Calendar.getInstance().getTime();
     }
@@ -329,6 +417,7 @@ public class AppActivity extends AppCompatActivity {
     public Location getLocation() {
         return location;
     }
+
     public void setLocation(Location loc) {
         location = loc;
     }
@@ -336,9 +425,11 @@ public class AppActivity extends AppCompatActivity {
     public BluetoothAdapter getBluetoothAdapter() {
         return bluetoothAdapter;
     }
+
     public ArrayAdapter<String> getBluetoothArrayAdapter() {
         return bluetoothArrayAdapter;
     }
+
     public BroadcastReceiver getBluetoothBroadcastReceiver() {
         return bluetoothBroadcastReceiver;
     }
