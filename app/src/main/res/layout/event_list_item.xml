@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/event-list"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:minHeight="80dp"
@@ -12,7 +13,7 @@
         android:layout_marginLeft="20px"
         android:text="Date"
         android:textSize="14dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
 

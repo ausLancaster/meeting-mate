@@ -33,12 +33,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.team33.meetingmate.ui.files.FileUploadActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -55,7 +53,6 @@ public class AppActivity extends AppCompatActivity {
     private final static int AUDIO_RECODING_PERMISSION_REQUEST_CODE = 102;
     private final static int DOCUMENT_RESULT_REQUEST_CODE = 103;
     private final static int AUDIO_RECORDING_RESULT_REQUEST_CODE = 104;
-    private final static String ATTACHMENT_IMAGE_REF = "attachments";
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -172,13 +169,13 @@ public class AppActivity extends AppCompatActivity {
         });
 
         fabCreateMeeting.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              closeFABMenu();
-              Intent intent = new Intent(AppActivity.this, CreateEventActivity.class);
-              startActivity(intent);
-          }
-      });
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                Intent intent = new Intent(AppActivity.this, CreateEventActivity.class);
+                startActivity(intent);
+            }
+        });
         // Location services
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -315,17 +312,30 @@ public class AppActivity extends AppCompatActivity {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     assert photo != null;
                     photo.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    uploadByteArray(stream.toByteArray(), eventId, timestamp + ".png");
+
+                    Intent intent = new Intent(this, FileUploadActivity.class);
+                    intent.putExtra("image_data", stream.toByteArray());
+                    intent.putExtra("file_name", timestamp);
+                    intent.putExtra("file_extension", "png");
+                    intent.putExtra("file_type", "IMAGE");
+                    startActivity(intent);
                     break;
                 case DOCUMENT_RESULT_REQUEST_CODE:
                     Uri uri = data.getData();
                     String fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
-                    uploadFile(uri, eventId, fileName);
+                    intent = new Intent(this, FileUploadActivity.class);
+                    intent.putExtra("file_url", uri);
+                    intent.putExtra("file_name", fileName);
+                    startActivity(intent);
                     break;
                 case AUDIO_RECORDING_RESULT_REQUEST_CODE:
-                    Uri audioUri = data.getData();
-                    fileName = audioUri.getLastPathSegment() == null ? timestamp : audioUri.getLastPathSegment();
-                    uploadFile(audioUri, eventId, fileName);
+                    uri = data.getData();
+                    fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
+                    intent = new Intent(this, FileUploadActivity.class);
+                    intent.putExtra("file_url", uri);
+                    intent.putExtra("file_name", fileName);
+                    intent.putExtra("file_extension", "mp3");
+                    startActivity(intent);
                     break;
             }
         }
@@ -368,42 +378,6 @@ public class AppActivity extends AppCompatActivity {
         fabCamera.animate().translationY(0).translationX(0);
         fabMic.animate().translationY(0).translationX(0);
         fabCreateMeeting.animate().translationY(0).translationX(0);
-    }
-
-    private void uploadFile(Uri uri, String eventID, String fileName) {
-        StorageReference mountainsRef = mStorage.child(ATTACHMENT_IMAGE_REF).child(eventID).child(fileName);
-
-        UploadTask uploadTask = mountainsRef.putFile(uri);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Log.d(TAG, "onFailure: " + exception.getMessage());
-                Toast.makeText(AppActivity.this, "Failed to attached file.", Toast.LENGTH_LONG).show();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(AppActivity.this, "Successfully attached file.", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void uploadByteArray(byte[] data, String meetingID, final String fileName) {
-        StorageReference mountainsRef = mStorage.child(ATTACHMENT_IMAGE_REF).child(meetingID).child(fileName);
-
-        UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Log.d(TAG, "onFailure: " + exception.getMessage());
-                Toast.makeText(AppActivity.this, "Failed to attached file.", Toast.LENGTH_LONG).show();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(AppActivity.this, "Successfully attached file.", Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     public Date getTime() {
