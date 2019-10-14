@@ -18,6 +18,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
 
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import java.util.Map;
 
 public class FileUploadActivity extends AppCompatActivity {
     private final static String TAG = "FileUploadActivity";
-    private final static String ATTACHMENT_REF = "attachments";
 
 
     private Uri fileURI;
@@ -57,11 +57,15 @@ public class FileUploadActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            fileURI = (Uri) extras.get("file_url");
-            fileName = (String) extras.get("file_name");
-            fileExtension = (String) extras.get("file_ext");
-            fileType = extras.get("file_type") == null ? "" : (String) extras.get("file_type");
-            fileBytes = extras.get("image_data") == null ? null : (byte[]) extras.get("image_data");
+            fileURI = (Uri) extras.get(Constants.ExtrasFileUrl);
+            fileName = (String) extras.get(Constants.ExtrasFileName);
+            fileExtension = (String) extras.get(Constants.ExtrasFileExtension);
+
+            Object fileTypeObject = extras.get(Constants.ExtrasFileType);
+            fileType = fileTypeObject == null ? "" : (String) fileTypeObject;
+
+            Object imageDataObject = extras.get(Constants.ExtrasImageData);
+            fileBytes = imageDataObject == null ? null : (byte[]) imageDataObject;
         }
 
         // Firebase storage
@@ -80,12 +84,12 @@ public class FileUploadActivity extends AppCompatActivity {
         }
 
         StorageReference mountainsRef = mStorage
-                .child(ATTACHMENT_REF)
+                .child(Constants.ATTACHMENT_REF)
                 .child(Integer.toString(eventID))
                 .child(uploadFileName);
 
         UploadTask uploadTask;
-        if (fileType != null && fileType.equals("IMAGE")) {
+        if (fileType != null && fileType.equals(Constants.IMMAGE_FILE_TYPE) && fileBytes != null) {
             uploadTask = mountainsRef.putBytes(fileBytes);
         } else {
             uploadTask = mountainsRef.putFile(fileURI);
