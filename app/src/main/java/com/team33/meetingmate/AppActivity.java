@@ -34,9 +34,15 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.team33.meetingmate.ui.files.FileUploadActivity;
 
+import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class AppActivity extends AppCompatActivity {
@@ -64,6 +70,8 @@ public class AppActivity extends AppCompatActivity {
 
     private ArrayAdapter<String> fileArrayAdapter;
 
+    private StorageReference mStorage;
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +89,9 @@ public class AppActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+
+        // Firebase storage
+        mStorage = FirebaseStorage.getInstance().getReference();
 
         // FAB buttons
         FloatingActionButton fab = findViewById(R.id.fab_plus);
@@ -100,7 +111,35 @@ public class AppActivity extends AppCompatActivity {
             }
         });
 
-        // Document
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isFabOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
+            }
+        });
+
+        fabCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                if (ContextCompat.checkSelfPermission(AppActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(
+                            AppActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            CAMERA_PERMISSION_REQUEST_CODE);
+                } else {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_RESULT_REQUEST_CODE);
+                }
+            }
+        });
+
         fabAddDocument.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,13 +169,13 @@ public class AppActivity extends AppCompatActivity {
         });
 
         fabCreateMeeting.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              closeFABMenu();
-              Intent intent = new Intent(AppActivity.this, CreateEventActivity.class);
-              startActivity(intent);
-          }
-      });
+            @Override
+            public void onClick(View v) {
+                closeFABMenu();
+                Intent intent = new Intent(AppActivity.this, CreateEventActivity.class);
+                startActivity(intent);
+            }
+        });
         // Location services
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -168,7 +207,7 @@ public class AppActivity extends AppCompatActivity {
             Boolean gpsEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.GPS_PROVIDER);
             Boolean networkEnabled = Settings.Secure.isLocationProviderEnabled(contentResolver, LocationManager.NETWORK_PROVIDER);
 
-            if (!gpsEnabled && !networkEnabled){
+            if (!gpsEnabled && !networkEnabled) {
                 // No location provider enabled
                 Toast.makeText(getBaseContext(), "Unable to fetch location", Toast.LENGTH_SHORT).show();
             } else {
@@ -200,7 +239,7 @@ public class AppActivity extends AppCompatActivity {
                 else if (action.equals(bluetoothAdapter.ACTION_STATE_CHANGED)) {
                     final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, bluetoothAdapter.ERROR);
 
-                    switch(state){
+                    switch (state) {
                         case BluetoothAdapter.STATE_OFF:
                             Log.d(TAG, "Bluetooth: STATE OFF");
                             break;
@@ -260,19 +299,43 @@ public class AppActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // TODO: use the real meeting ID later
+        String eventId = "222";
+
+        SimpleDateFormat m_sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH);
+        String timestamp = m_sdf.format(new Date());
+
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case CAMERA_RESULT_REQUEST_CODE:
                     Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    Toast.makeText(this, "got image " + photo.getHeight() + "x" + photo.getWidth(), Toast.LENGTH_LONG).show();
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    assert photo != null;
+                    photo.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+                    Intent intent = new Intent(this, FileUploadActivity.class);
+                    intent.putExtra("image_data", stream.toByteArray());
+                    intent.putExtra("file_name", timestamp);
+                    intent.putExtra("file_extension", "png");
+                    intent.putExtra("file_type", "IMAGE");
+                    startActivity(intent);
                     break;
                 case DOCUMENT_RESULT_REQUEST_CODE:
-                    String filePath = data.getData().getPath();
-                    Toast.makeText(this, "got document from " + filePath, Toast.LENGTH_LONG).show();
+                    Uri uri = data.getData();
+                    String fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
+                    intent = new Intent(this, FileUploadActivity.class);
+                    intent.putExtra("file_url", uri);
+                    intent.putExtra("file_name", fileName);
+                    startActivity(intent);
                     break;
                 case AUDIO_RECORDING_RESULT_REQUEST_CODE:
-                    Uri audioUri = data.getData();
-                    Toast.makeText(this, "got audio from uri: " + audioUri, Toast.LENGTH_LONG).show();
+                    uri = data.getData();
+                    fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
+                    intent = new Intent(this, FileUploadActivity.class);
+                    intent.putExtra("file_url", uri);
+                    intent.putExtra("file_name", fileName);
+                    intent.putExtra("file_extension", "mp3");
+                    startActivity(intent);
                     break;
             }
         }
@@ -294,7 +357,6 @@ public class AppActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void showFABMenu() {
         isFabOpen = true;
@@ -329,6 +391,7 @@ public class AppActivity extends AppCompatActivity {
     public Location getLocation() {
         return location;
     }
+
     public void setLocation(Location loc) {
         location = loc;
     }
@@ -336,9 +399,11 @@ public class AppActivity extends AppCompatActivity {
     public BluetoothAdapter getBluetoothAdapter() {
         return bluetoothAdapter;
     }
+
     public ArrayAdapter<String> getBluetoothArrayAdapter() {
         return bluetoothArrayAdapter;
     }
+
     public BroadcastReceiver getBluetoothBroadcastReceiver() {
         return bluetoothBroadcastReceiver;
     }
