@@ -96,7 +96,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
         month = calendar.get(java.util.Calendar.MONTH);
         day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
-        showDate(year, month+1, day);
+        showDate(year, month, day);
 
         startTime = findViewById(R.id.textView4);
         endTime = findViewById(R.id.textView7);
@@ -192,6 +192,9 @@ public class CreateEventActivity extends AppCompatActivity {
     };
 
     private void showDate(int year, int month, int day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
         dateView.setText(new StringBuilder().append(day).append("/")
                 .append(month).append("/").append(year));
     }
