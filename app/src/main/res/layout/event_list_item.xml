@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/event-list"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:minHeight="80dp"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/listevent_date"
@@ -12,43 +12,53 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20px"
         android:text="Date"
-        android:textSize="14dp"
+        android:textSize="24dp"
         android:textStyle="bold" />
 
-    <TextView
-
-        android:id="@+id/listevent_title"
+    <LinearLayout
+        android:id="@+id/event-details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="10dp"
-        android:text="Event Title" />
+        android:orientation="horizontal"
+        android:minHeight="50dp"
+        >
 
-    <TextView
+        <TextView
 
-        android:id="@+id/listevent_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="10dp"
-        android:text="Location" />
+            android:id="@+id/listevent_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:text="Location" />
 
-    <TextView
+        <TextView
 
-        android:id="@+id/listevent_starttime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="10dp"
-        android:text="Start Time" />
+            android:id="@+id/listevent_starttime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:text="Start Time" />
 
-    <TextView
+        <TextView
 
-        android:id="@+id/listevent_endtime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="10dp"
-        android:text="End Time" />
+            android:id="@+id/listevent_endtime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:text="End Time" />
+
+        <TextView
+
+            android:id="@+id/listevent_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:text="Event Title" />
+
+    </LinearLayout>
 
 </LinearLayout>

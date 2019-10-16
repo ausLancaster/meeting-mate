@@ -80,11 +80,13 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
                 startDate.getMonth() == previousDate.getMonth() &&
                 startDate.getDay() == previousDate.getDay()) {
             viewHolder.date.setVisibility(View.GONE);
+        } else {
+            viewHolder.date.setVisibility(View.VISIBLE);
         }
         viewHolder.startTime.setText(TimeUtility.formatTime(startDate));
         viewHolder.endTime.setText(TimeUtility.formatTime(new Date((long) eventData.get("endDate"))));
         viewHolder.date.setText(TimeUtility.formatDate(startDate));
-        previousDate = startDate;
+        previousDate = (Date) startDate.clone();
 
         return view;
     }

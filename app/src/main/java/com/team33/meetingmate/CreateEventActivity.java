@@ -96,7 +96,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
         month = calendar.get(java.util.Calendar.MONTH);
         day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
-        showDate(year, month+1, day);
+        showDate(year, month, day);
 
         startTime = findViewById(R.id.textView4);
         endTime = findViewById(R.id.textView7);
@@ -192,6 +192,9 @@ public class CreateEventActivity extends AppCompatActivity {
     };
 
     private void showDate(int year, int month, int day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
         dateView.setText(new StringBuilder().append(day).append("/")
                 .append(month).append("/").append(year));
     }
@@ -292,6 +295,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 .setDateTime(endDateTime)
                 .setTimeZone("Australia/Melbourne");
         event.setEnd(end);
+        eventId = event.hashCode();
         event.setId(Integer.toString(eventId));
         if (SettingsFragment.syncCalendar) {
             AsyncInsertEvent.run(this);
@@ -308,10 +312,8 @@ public class CreateEventActivity extends AppCompatActivity {
         eventData.put("endDate", endDate.getTime());
         eventData.put("id", eventId);
 
-        eventId++;
-
         db.collection("events")
-                .document(event.getId())
+                .document(Integer.toString(eventId))
                 .set(eventData);
 
         Intent intent = new Intent(this, AppActivity.class);
