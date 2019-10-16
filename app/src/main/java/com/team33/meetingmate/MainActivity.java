@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.TargetApi;
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
         FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
+        NotificationsDeliver.getInstance().createNotificationChannel(this);
 
         Button startNormalActivity = (Button) findViewById(R.id.button_activity);
         startNormalActivity.setOnClickListener(new View.OnClickListener() {
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean cipherInit() {
 
         try {
-            cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES+"/"+KeyProperties.BLOCK_MODE_CBC+"/"+KeyProperties.ENCRYPTION_PADDING_PKCS7);
+            cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_CBC + "/" + KeyProperties.ENCRYPTION_PADDING_PKCS7);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchPaddingException e) {
@@ -149,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         KeyGenerator keyGenerator = null;
 
         try {
-            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");
+            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchProviderException e) {
@@ -158,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             keyStore.load(null);
-            keyGenerator.init(new KeyGenParameterSpec.Builder(KEY_NAME,KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+            keyGenerator.init(new KeyGenParameterSpec.Builder(KEY_NAME, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                     .setUserAuthenticationRequired(true)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7).build()
             );
@@ -169,9 +171,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (CertificateException e) {
             e.printStackTrace();
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
+        } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
 
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void logout(){
+    private void logout() {
         mAuth.signOut();
         Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_LONG).show();
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
