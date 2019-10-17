@@ -111,17 +111,6 @@ public class AppActivity extends AppCompatActivity {
             }
         });
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!isFabOpen) {
-                    showFABMenu();
-                } else {
-                    closeFABMenu();
-                }
-            }
-        });
-
         fabCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -314,27 +303,27 @@ public class AppActivity extends AppCompatActivity {
                     photo.compress(Bitmap.CompressFormat.JPEG, 100, stream);
 
                     Intent intent = new Intent(this, FileUploadActivity.class);
-                    intent.putExtra("image_data", stream.toByteArray());
-                    intent.putExtra("file_name", timestamp);
-                    intent.putExtra("file_extension", "png");
-                    intent.putExtra("file_type", "IMAGE");
+                    intent.putExtra(Constants.EXTRAS_IMAGE_DATA, stream.toByteArray());
+                    intent.putExtra(Constants.EXTRAS_FILE_NAME, timestamp);
+                    intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, "png");
+                    intent.putExtra(Constants.ExtrasFileType, Constants.IMAGE_FILE_TYPE);
                     startActivity(intent);
                     break;
                 case DOCUMENT_RESULT_REQUEST_CODE:
                     Uri uri = data.getData();
                     String fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
                     intent = new Intent(this, FileUploadActivity.class);
-                    intent.putExtra("file_url", uri);
-                    intent.putExtra("file_name", fileName);
+                    intent.putExtra(Constants.EXTRAS_FILE_URL, uri);
+                    intent.putExtra(Constants.EXTRAS_FILE_NAME, fileName);
                     startActivity(intent);
                     break;
                 case AUDIO_RECORDING_RESULT_REQUEST_CODE:
                     uri = data.getData();
                     fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
                     intent = new Intent(this, FileUploadActivity.class);
-                    intent.putExtra("file_url", uri);
-                    intent.putExtra("file_name", fileName);
-                    intent.putExtra("file_extension", "mp3");
+                    intent.putExtra(Constants.EXTRAS_FILE_URL, uri);
+                    intent.putExtra(Constants.EXTRAS_FILE_NAME, fileName);
+                    intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, "mp3");
                     startActivity(intent);
                     break;
             }
