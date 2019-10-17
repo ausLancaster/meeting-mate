@@ -66,9 +66,6 @@ public class AppActivity extends AppCompatActivity {
 
     private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver bluetoothBroadcastReceiver;
-    private ArrayAdapter<String> bluetoothArrayAdapter;
-
-    private ArrayAdapter<String> fileArrayAdapter;
 
     private StorageReference mStorage;
 
@@ -204,50 +201,6 @@ public class AppActivity extends AppCompatActivity {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
             }
         }
-
-        // Bluetooth
-
-        bluetoothArrayAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item_1, android.R.id.text1);
-        bluetoothArrayAdapter.add("test");
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-
-                // Searching for devices
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    // Get bluetooth device object from the intent
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // Add name and address of device to an array adapter
-                    bluetoothArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                    bluetoothArrayAdapter.notifyDataSetChanged();
-                    Log.d(TAG, "Bluetooth: " + device.getName() + "\n" + device.getAddress());
-                }
-                // When discovery finds a device
-                else if (action.equals(bluetoothAdapter.ACTION_STATE_CHANGED)) {
-                    final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, bluetoothAdapter.ERROR);
-
-                    switch (state) {
-                        case BluetoothAdapter.STATE_OFF:
-                            Log.d(TAG, "Bluetooth: STATE OFF");
-                            break;
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            Log.d(TAG, "Bluetooth: STATE TURNING OFF");
-                            break;
-                        case BluetoothAdapter.STATE_ON:
-                            Log.d(TAG, "Bluetooth: STATE ON");
-                            break;
-                        case BluetoothAdapter.STATE_TURNING_ON:
-                            Log.d(TAG, "Bluetooth: STATE TURNING ON");
-                            break;
-                    }
-                }
-            }
-        };
-
-        fileArrayAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item_1, android.R.id.text1);
-        fileArrayAdapter.add("test");
 
     }
 
@@ -389,16 +342,8 @@ public class AppActivity extends AppCompatActivity {
         return bluetoothAdapter;
     }
 
-    public ArrayAdapter<String> getBluetoothArrayAdapter() {
-        return bluetoothArrayAdapter;
-    }
-
     public BroadcastReceiver getBluetoothBroadcastReceiver() {
         return bluetoothBroadcastReceiver;
-    }
-
-    public ArrayAdapter<String> getFileArrayAdapter() {
-        return fileArrayAdapter;
     }
 
 }

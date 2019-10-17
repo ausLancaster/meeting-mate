@@ -52,9 +52,6 @@ public class SettingsFragment extends Fragment {
         view = getView();
         activity = ((AppActivity) getActivity());
 
-//        ListView listDevices = (ListView) v.findViewById(R.id.list_devices);
-//        listDevices.setAdapter(activity.getBluetoothArrayAdapter());
-
 //        Button btnONOFF = (Button) v.findViewById(R.id.btnONOFF);
 //        btnONOFF.setOnClickListener(new View.OnClickListener() {
 //            @Override
