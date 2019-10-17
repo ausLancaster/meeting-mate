@@ -57,14 +57,14 @@ public class FileUploadActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            fileURI = (Uri) extras.get(Constants.ExtrasFileUrl);
-            fileName = (String) extras.get(Constants.ExtrasFileName);
-            fileExtension = (String) extras.get(Constants.ExtrasFileExtension);
+            fileURI = (Uri) extras.get(Constants.EXTRAS_FILE_URL);
+            fileName = (String) extras.get(Constants.EXTRAS_FILE_NAME);
+            fileExtension = (String) extras.get(Constants.EXTRAS_FILE_EXTENSION);
 
             Object fileTypeObject = extras.get(Constants.ExtrasFileType);
             fileType = fileTypeObject == null ? "" : (String) fileTypeObject;
 
-            Object imageDataObject = extras.get(Constants.ExtrasImageData);
+            Object imageDataObject = extras.get(Constants.EXTRAS_IMAGE_DATA);
             fileBytes = imageDataObject == null ? null : (byte[]) imageDataObject;
         }
 
@@ -89,7 +89,7 @@ public class FileUploadActivity extends AppCompatActivity {
                 .child(uploadFileName);
 
         UploadTask uploadTask;
-        if (fileType != null && fileType.equals(Constants.IMMAGE_FILE_TYPE) && fileBytes != null) {
+        if (fileType != null && fileType.equals(Constants.IMAGE_FILE_TYPE) && fileBytes != null) {
             uploadTask = mountainsRef.putBytes(fileBytes);
         } else {
             uploadTask = mountainsRef.putFile(fileURI);
