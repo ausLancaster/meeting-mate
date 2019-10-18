@@ -13,7 +13,7 @@ import static com.team33.meetingmate.MainActivity.TAG;
 
 public class AcceptThread extends Thread {
 
-    private final UUID MY_UUID = UUID.randomUUID();
+    private final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private final BluetoothServerSocket mmServerSocket;
 
     public AcceptThread() {
@@ -55,6 +55,8 @@ public class AcceptThread extends Thread {
     }
 
     private void manageMyConnectedSocket(BluetoothSocket socket) {
+        Log.d(TAG, "Connected to " + socket.getRemoteDevice().getName());
+        BluetoothService service = new BluetoothService(socket);
     }
 
     // Closes the connect socket and causes the thread to finish.

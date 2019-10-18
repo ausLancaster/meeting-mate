@@ -177,7 +177,7 @@ public class FileUploadActivity extends AppCompatActivity {
                 Log.d(TAG, "Bluetooth: Attempting to connect to " + name);
                 BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
                 ConnectThread connectThread = new ConnectThread(device, fileBytes);
-                connectThread.run();
+                connectThread.start();
             }
         });
 
