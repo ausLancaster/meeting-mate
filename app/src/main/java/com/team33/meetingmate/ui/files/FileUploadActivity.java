@@ -28,12 +28,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.team33.meetingmate.AcceptThread;
-import com.team33.meetingmate.ConnectThread;
+import com.team33.meetingmate.service.ConnectThread;
 import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +40,6 @@ import java.util.Set;
 
 public class FileUploadActivity extends AppCompatActivity {
     private final static String TAG = "FileUploadActivity";
-
 
     private Uri fileURI;
     private String fileName;
@@ -58,7 +55,7 @@ public class FileUploadActivity extends AppCompatActivity {
     private StorageReference mStorage;
 
     private ArrayAdapter<String> deviceArrayAdapter;
-    private final Integer REQUEST_ENABLE_BT = 1;
+    private final static int REQUEST_ENABLE_BT = 200;
 
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -108,7 +105,6 @@ public class FileUploadActivity extends AppCompatActivity {
         radioGroup = findViewById(R.id.events_list);
         fetchEvents();
 
-
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             fileURI = (Uri) extras.get(Constants.EXTRAS_FILE_URL);
@@ -133,11 +129,6 @@ public class FileUploadActivity extends AppCompatActivity {
         // Register for broadcasts when a device is discovered.
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(receiver, filter);
-
-//        // Enable discoverability
-//        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-//        startActivity(discoverableIntent);
 
         bluetooth.setOnClickListener(v -> {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -176,7 +167,7 @@ public class FileUploadActivity extends AppCompatActivity {
                 String address = ((String) parent.getAdapter().getItem(position)).split(",")[1];
                 Log.d(TAG, "Bluetooth: Attempting to connect to " + name);
                 BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
-                ConnectThread connectThread = new ConnectThread(device, fileBytes);
+                ConnectThread connectThread = new ConnectThread(device, fileURI.getPath().getBytes());
                 connectThread.start();
             }
         });

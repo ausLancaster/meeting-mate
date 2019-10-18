@@ -16,11 +16,15 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -53,6 +57,7 @@ public class AppActivity extends AppCompatActivity {
     private final static int AUDIO_RECODING_PERMISSION_REQUEST_CODE = 102;
     private final static int DOCUMENT_RESULT_REQUEST_CODE = 103;
     private final static int AUDIO_RECORDING_RESULT_REQUEST_CODE = 104;
+    private final static int REQUEST_ENABLE_BT = 200;
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -64,10 +69,21 @@ public class AppActivity extends AppCompatActivity {
     private LocationListener locationListener;
     private Location location;
 
+    private static ArrayAdapter<byte[]> receivedFilesArrayAdapter;
     private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver bluetoothBroadcastReceiver;
 
     private StorageReference mStorage;
+
+    public static Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message message) {
+            Bundle bundle = message.getData();
+            byte[] receivedBytes = bundle.getByteArray("BLUETOOTH_RECEIVED_FILE");
+            Log.d(TAG, "Got data + " + receivedBytes);
+            receivedFilesArrayAdapter.add(receivedBytes);
+        }
+    };
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -202,6 +218,9 @@ public class AppActivity extends AppCompatActivity {
             }
         }
 
+        // Bluetooth Files
+        receivedFilesArrayAdapter = new ArrayAdapter<byte[]>(this, R.layout.simple_list_item_1, android.R.id.text1);
+
     }
 
     @Override
@@ -279,6 +298,21 @@ public class AppActivity extends AppCompatActivity {
                     intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, "mp3");
                     startActivity(intent);
                     break;
+                case REQUEST_ENABLE_BT:
+                    Log.d(TAG, "Bluetooth: Bluetooth successfully enabled");
+                    break;
+//                case BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE:
+//                    Log.d(TAG, "Bluetooth: Bluetooth discovery successfully enabled");
+//                    break;
+            }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            switch (requestCode) {
+                case REQUEST_ENABLE_BT:
+                    Log.d(TAG, "Bluetooth: Bluetooth enabling cancelled");
+                    break;
+//                case BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE:
+//                    Log.d(TAG, "Bluetooth: Bluetooth discovery enabling cancelled");
+//                    break;
             }
         }
         fabCamera.setOnClickListener(new View.OnClickListener() {
@@ -344,6 +378,10 @@ public class AppActivity extends AppCompatActivity {
 
     public BroadcastReceiver getBluetoothBroadcastReceiver() {
         return bluetoothBroadcastReceiver;
+    }
+
+    public ArrayAdapter<byte[]> getReceivedFilesArrayAdapter() {
+        return receivedFilesArrayAdapter;
     }
 
 }

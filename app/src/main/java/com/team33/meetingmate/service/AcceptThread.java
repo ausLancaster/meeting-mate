@@ -1,4 +1,4 @@
-package com.team33.meetingmate;
+package com.team33.meetingmate.service;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -57,6 +57,8 @@ public class AcceptThread extends Thread {
     private void manageMyConnectedSocket(BluetoothSocket socket) {
         Log.d(TAG, "Connected to " + socket.getRemoteDevice().getName());
         BluetoothService service = new BluetoothService(socket);
+        service.run();
+        //service.receiveFileBytes();
     }
 
     // Closes the connect socket and causes the thread to finish.

@@ -1,4 +1,4 @@
-package com.team33.meetingmate;
+package com.team33.meetingmate.service;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -22,6 +22,7 @@ public class ConnectThread extends Thread {
         // because mmSocket is final.
         BluetoothSocket tmp = null;
         mmDevice = device;
+        Log.d(TAG, "OUTPUT BYTES IS " + fileBytes.toString());
         mmFileBytes = fileBytes;
 
         try {

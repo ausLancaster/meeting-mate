@@ -2,12 +2,17 @@ package com.team33.meetingmate.ui.files;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -17,7 +22,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.team33.meetingmate.AcceptThread;
+import com.team33.meetingmate.service.AcceptThread;
 import com.team33.meetingmate.AppActivity;
 import com.team33.meetingmate.R;
 
@@ -28,7 +33,6 @@ public class FilesFragment extends Fragment {
     private FilesViewModel filesViewModel;
     private View view;
     private AppActivity activity;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -51,6 +55,26 @@ public class FilesFragment extends Fragment {
 
         view = getView();
         activity = ((AppActivity) getActivity());
+
+        ListView listReceivedFiles = (ListView) view.findViewById(R.id.list_received_files);
+        listReceivedFiles.setAdapter(activity.getReceivedFilesArrayAdapter());
+        listReceivedFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                byte[] imageByteArray = (byte[]) parent.getAdapter().getItem(position);
+                System.out.println(imageByteArray);
+                // Display image
+                ImageView imgViewer = (ImageView) view.findViewById(R.id.test_image);
+                BitmapFactory bmf = new BitmapFactory();
+                Bitmap bm = bmf.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+                if (bm != null) {
+                    DisplayMetrics dm = new DisplayMetrics();
+                    activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+                    imgViewer.setMinimumHeight(dm.heightPixels);
+                    imgViewer.setMinimumWidth(dm.widthPixels);
+                    imgViewer.setImageBitmap(bm);
+                }
+            }
+        });
 
         Button receive = view.findViewById(R.id.button_receive);
         receive.setOnClickListener(v -> {

@@ -1,11 +1,17 @@
-package com.team33.meetingmate;
+package com.team33.meetingmate.service;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.team33.meetingmate.AppActivity;
+import com.team33.meetingmate.ui.files.FileUploadActivity;
+import com.team33.meetingmate.ui.files.FilesFragment;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,8 +21,7 @@ public class BluetoothService {
     private Handler handler; // handler that gets info from Bluetooth service
     private ConnectedThread connectedThread;
 
-    // Defines several constants used when transmitting messages between the
-    // service and the UI.
+    // Defines several constants used when transmitting messages between the service and the UI.
     private interface MessageConstants {
         public static final int MESSAGE_READ = 0;
         public static final int MESSAGE_WRITE = 1;
@@ -27,6 +32,7 @@ public class BluetoothService {
 
     BluetoothService(BluetoothSocket socket) {
         connectedThread = new ConnectedThread(socket);
+        handler = AppActivity.handler;
     }
 
     public void run() {
@@ -67,9 +73,12 @@ public class BluetoothService {
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
+            Log.d(TAG, "INS: "+mmInStream.toString());
+            Log.d(TAG, "OUTS: "+mmOutStream.toString());
         }
 
         public void run() {
+            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
             mmBuffer = new byte[1024];
             int numBytes; // bytes returned from read()
 
@@ -78,11 +87,15 @@ public class BluetoothService {
                 try {
                     // Read from the InputStream.
                     numBytes = mmInStream.read(mmBuffer);
-                    // Send the obtained bytes to the UI activity.
-                    Message readMsg = handler.obtainMessage(
-                            MessageConstants.MESSAGE_READ, numBytes, -1,
-                            mmBuffer);
-                    readMsg.sendToTarget();
+                    byteBuffer.write(mmBuffer, 0, numBytes);
+                    // Send the obtained bytes to AppActivity.
+                    System.out.println("GOT FILE OF LENGTH " + numBytes);
+                    Bundle dataBundle = new Bundle();
+                    dataBundle.putByteArray("BLUETOOTH_RECEIVED_FILE", byteBuffer.toByteArray());
+                    Message message = handler.obtainMessage();
+                    message.setData(dataBundle);
+                    handler.sendMessage(message);
+                    byteBuffer.flush();
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);
                     break;
@@ -96,9 +109,8 @@ public class BluetoothService {
                 mmOutStream.write(bytes);
 
                 // Share the sent message with the UI activity.
-                Message writtenMsg = handler.obtainMessage(
-                        MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
-                writtenMsg.sendToTarget();
+//                Message writtenMsg = handler.obtainMessage(MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
+//                writtenMsg.sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred when sending data", e);
 
