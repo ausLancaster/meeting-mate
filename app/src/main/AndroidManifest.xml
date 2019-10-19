@@ -52,6 +52,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+        <receiver android:name=".ui.calendar.EventAlarmReceiver" />
     </application>
     <uses-feature android:name="android.hardware.bluetooth" />
 
@@ -75,6 +76,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <permission android:name="android.permission.STATUS_BAR_SERVICE" android:protectionLevel="signature" />
 
     <dist:module dist:instant="true" />
 

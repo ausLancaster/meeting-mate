@@ -53,12 +53,13 @@ public class NotificationsDeliver {
                 .setContentText(text)
 //                .setStyle(new NotificationCompat.BigTextStyle()
 //                        .bigText("Much longer text that cannot fit one line..."))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVibrate(new long[] { 1000, 1000, 1000 });
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
         // notificationId is a unique int for each notification that you must define
         int randomId = new Random().nextInt();
-        notificationManager.notify(randomId, builder.build());
+        notificationManager.notify(999, builder.build());
     }
 }

@@ -3,8 +3,10 @@ package com.team33.meetingmate;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +40,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.team33.meetingmate.ui.calendar.EventAlarmReceiver;
 import com.team33.meetingmate.ui.settings.SettingsFragment;
 
 import java.util.Arrays;
@@ -60,6 +63,10 @@ public class CreateEventActivity extends AppCompatActivity {
     static final int REQUEST_AUTHORIZATION = 1;
 
     static final int REQUEST_ACCOUNT_PICKER = 2;
+
+    static final float MINUTES_NOTIFY_BEFORE_EVENT = 15;
+
+    static final float MINUTES_NOTIFY_BEFORE_MOVE = 45;
 
     private static final String APPLICATION_NAME = "Google Calendar API";
 
@@ -209,11 +216,11 @@ public class CreateEventActivity extends AppCompatActivity {
     public void showTime(TextView timeTextView, int hour, int min) {
 
         if (timeTextView == startTime) {
-            Log.d("Calendar", "set start time");
+            //Log.d("Calendar", "set start time");
             startHour = hour;
             startMin = min;
         } else {
-            Log.d("Calendar", "set end time");
+            //Log.d("Calendar", "set end time");
             endHour = hour;
             endMin = min;
         }
@@ -260,7 +267,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     void refreshView() {
         for (Event event : items) {
-            Log.d("Calendar", event.getSummary());
+            //Log.d("Calendar", event.getSummary());
         }
     }
 
@@ -274,9 +281,15 @@ public class CreateEventActivity extends AppCompatActivity {
 
     public void createEvent(View view) {
 
-        EditText editName = findViewById(R.id.editText);
+        // Create event and save to google calendar
+
+        EditText editText = findViewById(R.id.editText);
+        String name = editText.getText().toString();
+        if (name.equals("")) {
+            name = "(No title)";
+        }
         event = new Event()
-            .setSummary(editName.getText().toString());
+            .setSummary(name);
 
         if (selectedPlace != null) {
             event.setLocation(selectedPlace.toString());
@@ -301,10 +314,12 @@ public class CreateEventActivity extends AppCompatActivity {
             AsyncInsertEvent.run(this);
         }
 
+        // Save event to firestore
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> eventData = new HashMap<>();
-        eventData.put("summary", editName.getText().toString());
+        eventData.put("summary", name);
         if (selectedPlace != null) {
             eventData.put("place", selectedPlace.toString());
         }
@@ -315,6 +330,23 @@ public class CreateEventActivity extends AppCompatActivity {
         db.collection("events")
                 .document(Integer.toString(eventId))
                 .set(eventData);
+
+        // Set alarm for notification
+
+        Intent alarmIntent = new Intent(this, EventAlarmReceiver.class);
+        alarmIntent.putExtra("Event Name", name);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1234, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(year, month, day, startHour, startMin);
+        // cal = java.util.Calendar.geInstance();
+        // cal.add(java.util.Calendar.SECOND, 3);
+        // manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+        manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        // Go to calendar
 
         Intent intent = new Intent(this, AppActivity.class);
         startActivity(intent);
