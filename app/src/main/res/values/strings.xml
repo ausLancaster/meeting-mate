@@ -12,4 +12,5 @@
     <string name="select_an_event_to_share_the_document">Select an event to share the document</string>
     <string name="share_via_bluetooth">Share via Bluetooth</string>
     <string name="upload">Upload</string>
+    <string name="files">Files</string>
 </resources>
