@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.SharedPreferences;
 
 import com.team33.meetingmate.ui.authentication.LoginActivity;
+import com.team33.meetingmate.ui.authentication.LoginGoogleActivity;
 
 public class LauncherActivity extends AppCompatActivity {
 
@@ -17,7 +18,7 @@ public class LauncherActivity extends AppCompatActivity {
         if (prefs.getBoolean("is_logged_in", false)) {
             startActivity(new Intent(this, MainActivity.class));
         } else {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LoginGoogleActivity.class));
         }
     }
 }

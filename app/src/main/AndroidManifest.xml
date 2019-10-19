@@ -31,14 +31,10 @@
         <activity
             android:name=".AppActivity"
             android:label="@string/title_activity_app">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.authentication.LoginActivity" />
+        <activity android:name=".ui.authentication.LoginGoogleActivity" />
         <activity android:name=".ui.authentication.RegistrationActivity" />
         <activity android:name=".ui.authentication.ForgotPasswordActivity" />
         <activity android:name=".ui.calendar.EventActivity" />
