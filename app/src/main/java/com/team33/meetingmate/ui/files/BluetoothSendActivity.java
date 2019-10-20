@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
-import com.team33.meetingmate.service.ConnectThread;
+import com.team33.meetingmate.bluetooth.BluetoothConnectThread;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -162,8 +162,8 @@ public class BluetoothSendActivity extends AppCompatActivity {
                     byte[] bytes = bos.toByteArray();
                     System.out.println("READ FILE OF BYTE LENGTH " + bytes.length);
 
-                    ConnectThread connectThread = new ConnectThread(device, bytes);
-                    connectThread.start();
+                    BluetoothConnectThread bluetoothConnectThread = new BluetoothConnectThread(device, bytes);
+                    bluetoothConnectThread.start();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {

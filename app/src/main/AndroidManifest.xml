@@ -61,7 +61,8 @@
         </activity>
         <activity
             android:name=".AppActivity"
-            android:label="@string/title_activity_app"></activity>
+            android:label="@string/title_activity_app">
+        </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.authentication.LoginActivity" />
         <activity android:name=".ui.authentication.LoginGoogleActivity" />
@@ -69,6 +70,7 @@
         <activity android:name=".ui.authentication.ForgotPasswordActivity" />
         <activity android:name=".ui.calendar.EventActivity" />
         <activity android:name=".ui.files.BluetoothSendActivity" />
+        <activity android:name=".ui.files.BluetoothReceiveActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

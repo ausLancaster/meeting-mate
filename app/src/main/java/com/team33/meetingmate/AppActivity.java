@@ -71,22 +71,10 @@ public class AppActivity extends AppCompatActivity {
     private LocationListener locationListener;
     private Location location;
 
-    private static ArrayAdapter<byte[]> receivedFilesArrayAdapter;
     private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver bluetoothBroadcastReceiver;
 
     private StorageReference mStorage;
-
-    public static Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message message) {
-            Bundle bundle = message.getData();
-            byte[] receivedBytes = bundle.getByteArray("BLUETOOTH_RECEIVED_FILE");
-            Log.d(TAG, "Got data of length " + receivedBytes.length);
-            receivedFilesArrayAdapter.add(receivedBytes);
-            receivedFilesArrayAdapter.notifyDataSetChanged();
-        }
-    };
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -221,9 +209,6 @@ public class AppActivity extends AppCompatActivity {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
             }
         }
-
-        // Bluetooth Files
-        receivedFilesArrayAdapter = new ArrayAdapter<byte[]>(this, R.layout.simple_list_item_1, android.R.id.text1);
 
         if ( ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
 
@@ -404,10 +389,6 @@ public class AppActivity extends AppCompatActivity {
 
     public BroadcastReceiver getBluetoothBroadcastReceiver() {
         return bluetoothBroadcastReceiver;
-    }
-
-    public ArrayAdapter<byte[]> getReceivedFilesArrayAdapter() {
-        return receivedFilesArrayAdapter;
     }
 
 }

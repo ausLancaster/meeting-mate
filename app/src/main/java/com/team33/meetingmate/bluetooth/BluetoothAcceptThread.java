@@ -1,4 +1,4 @@
-package com.team33.meetingmate.service;
+package com.team33.meetingmate.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -11,12 +11,12 @@ import java.util.UUID;
 import static android.provider.Settings.NameValueTable.NAME;
 import static com.team33.meetingmate.MainActivity.TAG;
 
-public class AcceptThread extends Thread {
+public class BluetoothAcceptThread extends Thread {
 
     private final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private final BluetoothServerSocket mmServerSocket;
 
-    public AcceptThread() {
+    public BluetoothAcceptThread() {
         // Use a temporary object that is later assigned to mmServerSocket
         // because mmServerSocket is final.
         BluetoothServerSocket tmp = null;

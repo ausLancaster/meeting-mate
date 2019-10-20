@@ -1,18 +1,12 @@
-package com.team33.meetingmate.service;
+package com.team33.meetingmate.bluetooth;
 
 import android.bluetooth.BluetoothSocket;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.team33.meetingmate.AppActivity;
-import com.team33.meetingmate.ui.files.FileUploadActivity;
-import com.team33.meetingmate.ui.files.FilesFragment;
+import com.team33.meetingmate.ui.files.BluetoothReceiveActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,7 +29,7 @@ public class BluetoothService {
 
     BluetoothService(BluetoothSocket socket) {
         connectedThread = new ConnectedThread(socket);
-        handler = AppActivity.handler;
+        handler = BluetoothReceiveActivity.handler;
     }
 
     public void run() {
