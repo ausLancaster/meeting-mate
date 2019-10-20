@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.team33.meetingmate.ui.authentication.LoginActivity;
+import com.team33.meetingmate.ui.authentication.LoginGoogleActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.team33.meetingmate.ui.notifications.NotificationsDeliver;
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
     private void logout() {
         mAuth.signOut();
         Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_LONG).show();
-        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        startActivity(new Intent(MainActivity.this, LoginGoogleActivity.class));
     }
 
 }

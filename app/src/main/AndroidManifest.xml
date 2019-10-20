@@ -31,14 +31,10 @@
         <activity
             android:name=".AppActivity"
             android:label="@string/title_activity_app">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.authentication.LoginActivity" />
+        <activity android:name=".ui.authentication.LoginGoogleActivity" />
         <activity android:name=".ui.authentication.RegistrationActivity" />
         <activity android:name=".ui.authentication.ForgotPasswordActivity" />
         <activity android:name=".ui.calendar.EventActivity" />
@@ -55,10 +51,12 @@
         <receiver android:name=".ui.calendar.EventAlarmTravelReceiver" />
         <receiver android:name=".ui.calendar.EventAlarmNearReceiver" />
     </application>
+
     <uses-feature android:name="android.hardware.bluetooth" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.bluetooth" />
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -80,6 +78,8 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <permission android:name="android.permission.STATUS_BAR_SERVICE" android:protectionLevel="signature" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <dist:module dist:instant="true" />
 
