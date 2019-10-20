@@ -59,7 +59,7 @@ public class NotificationsDeliver {
         sendNotification(context, title, text, null);
     }
 
-        public void sendNotification(@NonNull Context context, String title, String text, PendingIntent pendingIntent ) {
+    public void sendNotification(@NonNull Context context, String title, String text, PendingIntent pendingIntent) {
 
         // Send notification to phone
 
@@ -70,7 +70,7 @@ public class NotificationsDeliver {
 //                .setStyle(new NotificationCompat.BigTextStyle()
 //                        .bigText("Much longer text that cannot fit one line..."))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setVibrate(new long[] { 1000, 1000, 1000 })
+                .setVibrate(new long[]{1000, 1000, 1000})
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
@@ -81,9 +81,9 @@ public class NotificationsDeliver {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> notificationData = new HashMap<>();
-            notificationData.put("text", text);
-            notificationData.put("date", Calendar.getInstance().getTimeInMillis());
-            notificationData.put("seen", false);
+        notificationData.put("text", text);
+        notificationData.put("date", Calendar.getInstance().getTimeInMillis());
+        notificationData.put("seen", false);
 
         db.collection("notifications")
                 .document(Integer.toString(notificationData.hashCode()))
