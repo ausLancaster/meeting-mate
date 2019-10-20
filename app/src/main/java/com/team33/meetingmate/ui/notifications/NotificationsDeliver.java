@@ -1,4 +1,4 @@
-package com.team33.meetingmate;
+package com.team33.meetingmate.ui.notifications;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,6 +12,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.team33.meetingmate.R;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,9 +25,9 @@ public class NotificationsDeliver {
     private final static String CHANNEL_NAME = "meeting mate notifications channel";
     private final static String CHANNEL_DESCRIPTION = "meeting mate notifications channel";
 
-    public static final int MINUTES_NOTIFY_BEFORE_EVENT = 1;
+    public static final int MINUTES_NOTIFY_BEFORE_EVENT = 15;
 
-    public static final int MINUTES_NOTIFY_BEFORE_MOVE = 2;
+    public static final int MINUTES_NOTIFY_BEFORE_MOVE = 45;
 
     private static NotificationsDeliver instance;
 
@@ -82,6 +83,7 @@ public class NotificationsDeliver {
         Map<String, Object> notificationData = new HashMap<>();
             notificationData.put("text", text);
             notificationData.put("date", Calendar.getInstance().getTimeInMillis());
+            notificationData.put("seen", false);
 
         db.collection("notifications")
                 .document(Integer.toString(notificationData.hashCode()))

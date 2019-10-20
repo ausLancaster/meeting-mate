@@ -14,7 +14,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -40,7 +39,8 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.team33.meetingmate.ui.calendar.EventAlarmReceiver;
+import com.team33.meetingmate.ui.calendar.EventAlarmTravelReceiver;
+import com.team33.meetingmate.ui.notifications.NotificationsDeliver;
 import com.team33.meetingmate.ui.settings.SettingsFragment;
 
 import java.util.Arrays;
@@ -177,14 +177,7 @@ public class CreateEventActivity extends AppCompatActivity {
         return null;
     }
 
-    private DatePickerDialog.OnDateSetListener myDateListener = new
-            DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker arg0,
-                                      int arg1, int arg2, int arg3) {
-                    showDate(arg1, arg2+1, arg3);
-                }
-            };
+    private DatePickerDialog.OnDateSetListener myDateListener = (arg0, arg1, arg2, arg3) -> showDate(arg1, arg2+1, arg3);
 
     private TimePickerDialog.OnTimeSetListener myStartTimeListener = new TimePickerDialog.OnTimeSetListener() {
         @Override
@@ -337,12 +330,13 @@ public class CreateEventActivity extends AppCompatActivity {
 
         // Set alarm for notification
 
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.set(year, month, day, startHour, startMin);
-
-        Intent alarmIntent = new Intent(this, EventAlarmReceiver.class);
+        Intent alarmIntent = new Intent(this, EventAlarmTravelReceiver.class);
         alarmIntent.putExtra("Name", name);
         alarmIntent.putExtra("id", eventId);
+        java.util.Calendar eventCal = java.util.Calendar.getInstance();
+        eventCal.set(year, month, day, startHour, startMin);
+        alarmIntent.putExtra("time", eventCal.getTimeInMillis());
+
         if (selectedPlace != null) {
             alarmIntent.putExtra("Latitude", selectedPlace.getLatLng().latitude);
             alarmIntent.putExtra("Longitude", selectedPlace.getLatLng().longitude);
@@ -351,9 +345,9 @@ public class CreateEventActivity extends AppCompatActivity {
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        // cal.add(java.util.Calendar.MINUTE, -NotificationsDeliver.MINUTES_NOTIFY_BEFORE_EVENT);
-        // cal = java.util.Calendar.geInstance();
-        // cal.add(java.util.Calendar.SECOND, 3);
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(year, month, day, startHour, startMin);
+        cal.add(java.util.Calendar.MINUTE, -NotificationsDeliver.MINUTES_NOTIFY_BEFORE_MOVE);
         manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
         // Go to calendar

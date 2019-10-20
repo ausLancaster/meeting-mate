@@ -52,7 +52,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-        <receiver android:name=".ui.calendar.EventAlarmReceiver" />
+        <receiver android:name=".ui.calendar.EventAlarmTravelReceiver" />
         <receiver android:name=".ui.calendar.EventAlarmNearReceiver" />
     </application>
     <uses-feature android:name="android.hardware.bluetooth" />

@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.TargetApi;
 import android.app.KeyguardManager;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
@@ -18,6 +17,7 @@ import android.widget.Toast;
 import com.team33.meetingmate.ui.authentication.LoginActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.team33.meetingmate.ui.notifications.NotificationsDeliver;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;

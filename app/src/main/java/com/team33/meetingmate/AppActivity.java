@@ -89,7 +89,6 @@ public class AppActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-
         // Firebase storage
         mStorage = FirebaseStorage.getInstance().getReference();
 
@@ -165,6 +164,7 @@ public class AppActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         // Location services
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {

@@ -24,16 +24,8 @@ import java.util.Map;
 public class EventActivity extends AppCompatActivity {
 
     @Override
-    public void onNewIntent(Intent newIntent) {
-        Log.d("Calendar", "newIntent");
-        super.onNewIntent(newIntent);
-        this.setIntent(newIntent);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("Calendar", "event activity");
         setContentView(R.layout.content_show_event);
 
         final TextView name = findViewById(R.id.eventName);
@@ -60,7 +52,6 @@ public class EventActivity extends AppCompatActivity {
                                     location.setText((String) event.get("location"));
                                 }
                                 calendarList.add(document.getData());
-                                Log.d("Calendar", document.getId() + " => " + document.getData());
                             }
                         } else {
                             Log.d("Calendar", "Error getting documents: ", task.getException());

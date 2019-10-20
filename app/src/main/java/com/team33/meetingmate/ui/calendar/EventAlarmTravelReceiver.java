@@ -9,12 +9,15 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
-import com.team33.meetingmate.NotificationsDeliver;
+import com.team33.meetingmate.ui.notifications.NotificationsDeliver;
 
-public class EventAlarmReceiver extends BroadcastReceiver {
+import java.util.Calendar;
+
+public class EventAlarmTravelReceiver extends BroadcastReceiver {
 
     private final float MAX_DISTANCE = 0.05f;
 
@@ -48,6 +51,8 @@ public class EventAlarmReceiver extends BroadcastReceiver {
 
     private void sendTravelReminder(Context context, Intent intent) {
 
+        Log.d("Austin", "travel reminder");
+
         Intent nextIntent = new Intent(context, EventActivity.class);
         int id = intent.getIntExtra("id", 0);
         nextIntent.putExtra("id", (long)id);
@@ -69,9 +74,10 @@ public class EventAlarmReceiver extends BroadcastReceiver {
 
         AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        //cal.add(java.util.Calendar.MINUTE, 1);
-        cal.add(java.util.Calendar.SECOND, 3);
+        Calendar cal = Calendar.getInstance();
+        long millis = intent.getLongExtra("time", 0);
+        cal.setTimeInMillis(millis);
+        cal.add(java.util.Calendar.MINUTE, -NotificationsDeliver.MINUTES_NOTIFY_BEFORE_EVENT);
 
         manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
     }

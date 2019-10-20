@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.team33.meetingmate.NotificationsDeliver;
+import com.team33.meetingmate.ui.notifications.NotificationsDeliver;
 
 public class EventAlarmNearReceiver extends BroadcastReceiver {
     @Override
