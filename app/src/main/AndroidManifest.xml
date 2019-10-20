@@ -68,6 +68,7 @@
         <activity android:name=".ui.authentication.RegistrationActivity" />
         <activity android:name=".ui.authentication.ForgotPasswordActivity" />
         <activity android:name=".ui.calendar.EventActivity" />
+        <activity android:name=".ui.files.BluetoothSendActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
