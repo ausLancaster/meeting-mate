@@ -18,8 +18,8 @@ import com.team33.meetingmate.R;
 import com.team33.meetingmate.TimeUtility;
 import com.team33.meetingmate.ui.files.FileItem;
 import com.team33.meetingmate.ui.files.FilesAdapter;
-import com.team33.meetingmate.ui.files.firebase.FilesDownloader;
-import com.team33.meetingmate.ui.files.firebase.IFilesDownloaderCallback;
+import com.team33.meetingmate.firebase.files.FilesDownloader;
+import com.team33.meetingmate.firebase.files.IFilesDownloaderCallback;
 
 import java.util.ArrayList;
 import java.util.Date;

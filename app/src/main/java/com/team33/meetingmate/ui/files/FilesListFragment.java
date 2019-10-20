@@ -10,8 +10,8 @@ import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 
 import com.team33.meetingmate.R;
-import com.team33.meetingmate.ui.files.firebase.FilesDownloader;
-import com.team33.meetingmate.ui.files.firebase.IFilesDownloaderCallback;
+import com.team33.meetingmate.firebase.files.FilesDownloader;
+import com.team33.meetingmate.firebase.files.IFilesDownloaderCallback;
 
 import java.util.ArrayList;
 import java.util.Objects;
