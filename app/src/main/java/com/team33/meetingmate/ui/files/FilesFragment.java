@@ -28,7 +28,6 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.team33.meetingmate.AppActivity;
-import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
 
 import static com.team33.meetingmate.MainActivity.TAG;
@@ -42,7 +41,6 @@ import java.util.Date;
 import java.util.Objects;
 
 public class FilesFragment extends Fragment {
-    private final static String TAG = "FilesFragment";
 
     private FilesViewModel filesViewModel;
     private View view;
@@ -53,8 +51,7 @@ public class FilesFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         filesViewModel =
                 ViewModelProviders.of(this).get(FilesViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_files, container, false);
-/*
+        /*
         ArrayList<FileItem> files = new ArrayList<>();
         adapter = new FilesAdapter(Objects.requireNonNull(getActivity()), R.layout.file_list_item, files);
         ListView listView = root.findViewById(R.id.file_list_view);
@@ -130,7 +127,7 @@ public class FilesFragment extends Fragment {
 
 
          */
-        return root;
+        return inflater.inflate(R.layout.fragment_files, container, false);
     }
 
     @Override
