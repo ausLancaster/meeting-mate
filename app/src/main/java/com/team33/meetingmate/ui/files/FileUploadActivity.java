@@ -1,6 +1,7 @@
 package com.team33.meetingmate.ui.files;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,22 +14,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
+import com.team33.meetingmate.firebase.events.EventsFetcher;
+import com.team33.meetingmate.firebase.events.IEventsFetcherCallback;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class FileUploadActivity extends AppCompatActivity {
+public class FileUploadActivity extends AppCompatActivity implements IEventsFetcherCallback {
     private final static String TAG = "FileUploadActivity";
-
 
     private Uri fileURI;
     private String fileName;
@@ -43,6 +41,8 @@ public class FileUploadActivity extends AppCompatActivity {
 
     private StorageReference mStorage;
 
+    private final static int SHARE_RESULT_REQUEST_CODE = 201;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +52,9 @@ public class FileUploadActivity extends AppCompatActivity {
         upload = findViewById(R.id.button_upload);
         errorMessage = findViewById(R.id.error_message);
         radioGroup = findViewById(R.id.events_list);
-        fetchEvents();
 
+        EventsFetcher eventsFetcher = new EventsFetcher(this);
+        eventsFetcher.getAllEvents();
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -74,6 +75,17 @@ public class FileUploadActivity extends AppCompatActivity {
         upload.setOnClickListener(v -> {
             uploadFile(radioGroup.getCheckedRadioButtonId());
             finish();
+        });
+
+        bluetooth.setOnClickListener(v -> {
+            Intent intent = new Intent(FileUploadActivity.this, BluetoothSendActivity.class);
+            intent.putExtra(Constants.EXTRAS_FILE_URL, fileURI);
+            intent.putExtra(Constants.EXTRAS_FILE_NAME, fileName);
+            intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, fileExtension);
+            intent.putExtra(Constants.ExtrasFileType, fileType);
+            intent.putExtra(Constants.EXTRAS_IMAGE_DATA, fileBytes);
+
+            startActivityForResult(intent, SHARE_RESULT_REQUEST_CODE);
         });
     }
 
@@ -108,45 +120,29 @@ public class FileUploadActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG).show());
     }
 
+    @Override
+    public void onComplete(List<Map<String, Object>> eventsList) {
+        radioGroup.setOrientation(LinearLayout.VERTICAL);
+
+        for (int i = 0; i < eventsList.size(); i++) {
+            Map<String, Object> event = eventsList.get(i);
+
+            RadioButton radioButton = new RadioButton(FileUploadActivity.this);
+            long id = (long) event.get("id");
+            radioButton.setText((String) event.get("summary"));
+            radioButton.setId((int) id);
+            radioButton.setChecked(i == eventsList.size() - 1);
+
+            radioGroup.addView(radioButton);
+            upload.setEnabled(true);
+            bluetooth.setEnabled(true);
+        }
+    }
+
     @SuppressLint("SetTextI18n")
-    private void fetchEvents() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("events").get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        if (task.getResult().size() == 0) {
-                            Log.d("Calendar", "Calendar is empty");
-                            errorMessage.setText("Calendar is empty");
-                        }
-                        List<Map<String, Object>> eventsList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            eventsList.add(document.getData());
-                        }
-                        Collections.sort(
-                                eventsList,
-                                (Map<String, Object> e1, Map<String, Object> e2) ->
-                                        Long.compare((long) e1.get("startDate"), (long) e2.get("startDate"))
-                        );
-
-                        radioGroup.setOrientation(LinearLayout.VERTICAL);
-
-                        for (int i = eventsList.size() - 1; i >= 0; i--) {
-                            Map<String, Object> event = eventsList.get(i);
-
-                            RadioButton radioButton = new RadioButton(FileUploadActivity.this);
-                            long id = (long) event.get("id");
-                            radioButton.setText((String) event.get("summary"));
-                            radioButton.setId((int) id);
-                            radioButton.setChecked(i == eventsList.size() - 1);
-
-                            radioGroup.addView(radioButton);
-                            upload.setEnabled(true);
-                            bluetooth.setEnabled(true);
-                        }
-                    } else {
-                        Log.d("Calendar", "Error getting documents: ", task.getException());
-                        errorMessage.setText("Error while fetching events.");
-                    }
-                });
+    @Override
+    public void onError(String error) {
+        Log.d("Calendar", "Error getting documents: " + error);
+        errorMessage.setText("Error while fetching events.");
     }
 }
