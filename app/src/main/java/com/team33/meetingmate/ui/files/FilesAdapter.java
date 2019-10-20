@@ -4,14 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
@@ -33,7 +31,7 @@ public class FilesAdapter extends ArrayAdapter<FileItem> {
     private List<FileItem> filesList;
     private final static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
-    FilesAdapter(@NonNull Context context, int resource, @SuppressLint("SupportAnnotationUsage") @LayoutRes ArrayList<FileItem> files) {
+    public FilesAdapter(@NonNull Context context, int resource, @SuppressLint("SupportAnnotationUsage") @LayoutRes ArrayList<FileItem> files) {
         super(context, resource, files);
 
         mContext = context;

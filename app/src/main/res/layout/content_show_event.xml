@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.calendar.EventActivity"
-    >
+    tools:context=".ui.calendar.EventActivity">
 
     <TextView
         android:id="@+id/eventName"
@@ -26,28 +25,32 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="104dp"
         android:gravity="center"
-        android:text="Date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Date"/>
+
     <TextView
         android:id="@+id/eventTime"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="132dp"
         android:gravity="center"
-        android:text="Time"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Time"/>
+
     <TextView
         android:id="@+id/eventLocation"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="160dp"
         android:gravity="center"
-        android:text="Location"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="Location"/>
+
+    <ListView
+        android:id="@+id/event_file_list_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="180dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="10.0sp"
+        android:scrollingCache="true"
+        android:smoothScrollbar="true" />
+
+</RelativeLayout>
