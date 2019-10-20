@@ -15,6 +15,7 @@ import com.team33.meetingmate.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,22 @@ public class EventListFragment extends Fragment {
                                 (Map<String, Object> e1, Map<String, Object> e2) ->
                                         Long.compare((long)e1.get("startDate"), (long)e2.get("startDate"))
                         );
+                        if (calendarList.size() > 0) {
+                            Map<String, Object> eventData = calendarList.get(0);
+                            eventData.put("showDate", true);
+                            Date prevDate = new Date((long) eventData.get("startDate"));
+                            for (int i=1; i<calendarList.size(); i++) {
+                                eventData = calendarList.get(i);
+                                Date eventDate = new Date((long) eventData.get("startDate"));
+                                if (eventDate.getYear() == prevDate.getYear() &&
+                                        eventDate.getMonth() == prevDate.getMonth() &&
+                                        eventDate.getDay() == prevDate.getDay()) {
+                                    eventData.put("showDate", false);
+                                } else {
+                                    eventData.put("showDate", true);
+                                }
+                            }
+                        }
                         CalendarAdapter adapter = new CalendarAdapter(getActivity(), R.layout.event_list_item, calendarList);
                         ListView listView = view.findViewById(R.id.calendar_list_view);
                         listView.setAdapter(adapter);
