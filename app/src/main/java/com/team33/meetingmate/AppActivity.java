@@ -17,12 +17,16 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -55,6 +59,7 @@ public class AppActivity extends AppCompatActivity {
     private final static int AUDIO_RECODING_PERMISSION_REQUEST_CODE = 102;
     private final static int DOCUMENT_RESULT_REQUEST_CODE = 103;
     private final static int AUDIO_RECORDING_RESULT_REQUEST_CODE = 104;
+    private final static int REQUEST_ENABLE_BT = 200;
 
     private boolean isFabOpen;
     private FloatingActionButton fabCamera;
@@ -68,9 +73,6 @@ public class AppActivity extends AppCompatActivity {
 
     private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver bluetoothBroadcastReceiver;
-    private ArrayAdapter<String> bluetoothArrayAdapter;
-
-    private ArrayAdapter<String> fileArrayAdapter;
 
     private StorageReference mStorage;
 
@@ -208,50 +210,6 @@ public class AppActivity extends AppCompatActivity {
             }
         }
 
-        // Bluetooth
-
-        bluetoothArrayAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item_1, android.R.id.text1);
-        bluetoothArrayAdapter.add("test");
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-
-                // Searching for devices
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    // Get bluetooth device object from the intent
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // Add name and address of device to an array adapter
-                    bluetoothArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                    bluetoothArrayAdapter.notifyDataSetChanged();
-                    Log.d(TAG, "Bluetooth: " + device.getName() + "\n" + device.getAddress());
-                }
-                // When discovery finds a device
-                else if (action.equals(bluetoothAdapter.ACTION_STATE_CHANGED)) {
-                    final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, bluetoothAdapter.ERROR);
-
-                    switch (state) {
-                        case BluetoothAdapter.STATE_OFF:
-                            Log.d(TAG, "Bluetooth: STATE OFF");
-                            break;
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            Log.d(TAG, "Bluetooth: STATE TURNING OFF");
-                            break;
-                        case BluetoothAdapter.STATE_ON:
-                            Log.d(TAG, "Bluetooth: STATE ON");
-                            break;
-                        case BluetoothAdapter.STATE_TURNING_ON:
-                            Log.d(TAG, "Bluetooth: STATE TURNING ON");
-                            break;
-                    }
-                }
-            }
-        };
-
-        fileArrayAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item_1, android.R.id.text1);
-        fileArrayAdapter.add("test");
-
         if ( ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
 
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -326,6 +284,21 @@ public class AppActivity extends AppCompatActivity {
                     intent.putExtra(Constants.EXTRAS_FILE_NAME, getFileName(uri));
                     startActivity(intent);
                     break;
+                case REQUEST_ENABLE_BT:
+                    Log.d(TAG, "Bluetooth: Bluetooth successfully enabled");
+                    break;
+//                case BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE:
+//                    Log.d(TAG, "Bluetooth: Bluetooth discovery successfully enabled");
+//                    break;
+            }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            switch (requestCode) {
+                case REQUEST_ENABLE_BT:
+                    Log.d(TAG, "Bluetooth: Bluetooth enabling cancelled");
+                    break;
+//                case BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE:
+//                    Log.d(TAG, "Bluetooth: Bluetooth discovery enabling cancelled");
+//                    break;
             }
         }
         fabCamera.setOnClickListener(new View.OnClickListener() {
@@ -414,16 +387,8 @@ public class AppActivity extends AppCompatActivity {
         return bluetoothAdapter;
     }
 
-    public ArrayAdapter<String> getBluetoothArrayAdapter() {
-        return bluetoothArrayAdapter;
-    }
-
     public BroadcastReceiver getBluetoothBroadcastReceiver() {
         return bluetoothBroadcastReceiver;
-    }
-
-    public ArrayAdapter<String> getFileArrayAdapter() {
-        return fileArrayAdapter;
     }
 
 }

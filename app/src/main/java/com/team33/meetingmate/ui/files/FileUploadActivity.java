@@ -1,5 +1,7 @@
 package com.team33.meetingmate.ui.files;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +28,6 @@ import java.util.Map;
 public class FileUploadActivity extends AppCompatActivity implements IEventsFetcherCallback {
     private final static String TAG = "FileUploadActivity";
 
-
     private Uri fileURI;
     private String fileName;
     private String fileExtension;
@@ -39,6 +40,8 @@ public class FileUploadActivity extends AppCompatActivity implements IEventsFetc
     private TextView errorMessage;
 
     private StorageReference mStorage;
+
+    private final static int SHARE_RESULT_REQUEST_CODE = 201;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,17 @@ public class FileUploadActivity extends AppCompatActivity implements IEventsFetc
         upload.setOnClickListener(v -> {
             uploadFile(radioGroup.getCheckedRadioButtonId());
             finish();
+        });
+
+        bluetooth.setOnClickListener(v -> {
+            Intent intent = new Intent(FileUploadActivity.this, BluetoothSendActivity.class);
+            intent.putExtra(Constants.EXTRAS_FILE_URL, fileURI);
+            intent.putExtra(Constants.EXTRAS_FILE_NAME, fileName);
+            intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, fileExtension);
+            intent.putExtra(Constants.ExtrasFileType, fileType);
+            intent.putExtra(Constants.EXTRAS_IMAGE_DATA, fileBytes);
+
+            startActivityForResult(intent, SHARE_RESULT_REQUEST_CODE);
         });
     }
 
@@ -125,6 +139,7 @@ public class FileUploadActivity extends AppCompatActivity implements IEventsFetc
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onError(String error) {
         Log.d("Calendar", "Error getting documents: " + error);
