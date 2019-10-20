@@ -1,6 +1,9 @@
 package com.team33.meetingmate.service;
 
 import android.bluetooth.BluetoothSocket;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -88,18 +91,25 @@ public class BluetoothService {
                     // Read from the InputStream.
                     numBytes = mmInStream.read(mmBuffer);
                     byteBuffer.write(mmBuffer, 0, numBytes);
-                    // Send the obtained bytes to AppActivity.
-                    System.out.println("GOT FILE OF LENGTH " + numBytes);
-                    Bundle dataBundle = new Bundle();
-                    dataBundle.putByteArray("BLUETOOTH_RECEIVED_FILE", byteBuffer.toByteArray());
-                    Message message = handler.obtainMessage();
-                    message.setData(dataBundle);
-                    handler.sendMessage(message);
-                    byteBuffer.flush();
+                    System.out.println(numBytes);
+                    if (numBytes < 0) {
+                        break;
+                    }
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);
                     break;
                 }
+            }
+            // Send the obtained bytes to AppActivity.
+            Bundle dataBundle = new Bundle();
+            dataBundle.putByteArray("BLUETOOTH_RECEIVED_FILE", byteBuffer.toByteArray());
+            Message message = handler.obtainMessage();
+            message.setData(dataBundle);
+            handler.sendMessage(message);
+            try {
+                byteBuffer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
@@ -111,6 +121,8 @@ public class BluetoothService {
                 // Share the sent message with the UI activity.
 //                Message writtenMsg = handler.obtainMessage(MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
 //                writtenMsg.sendToTarget();
+                mmOutStream.flush();
+                mmOutStream.close();
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred when sending data", e);
 

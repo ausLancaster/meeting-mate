@@ -82,8 +82,9 @@ public class AppActivity extends AppCompatActivity {
         public void handleMessage(Message message) {
             Bundle bundle = message.getData();
             byte[] receivedBytes = bundle.getByteArray("BLUETOOTH_RECEIVED_FILE");
-            Log.d(TAG, "Got data + " + receivedBytes);
+            Log.d(TAG, "Got data of length " + receivedBytes.length);
             receivedFilesArrayAdapter.add(receivedBytes);
+            receivedFilesArrayAdapter.notifyDataSetChanged();
         }
     };
 

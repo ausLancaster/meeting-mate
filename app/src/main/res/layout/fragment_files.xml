@@ -2,30 +2,47 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp">
 
-    <ListView
-        android:id="@+id/file_list_view"
+<!--    <ListView-->
+<!--        android:id="@+id/file_list_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginLeft="30dp"-->
+<!--        android:layout_marginRight="30dp"-->
+<!--        android:divider="@android:color/transparent"-->
+<!--        android:dividerHeight="10.0sp"-->
+<!--        android:scrollingCache="true"-->
+<!--        android:smoothScrollbar="true"-->
+<!--        app:layout_constrainedHeight="true"-->
+<!--        app:layout_constraintBottom_toTopOf="parent"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"/>-->
+
+    <TextView
+        android:id="@+id/label"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="10.0sp"
-        android:scrollingCache="true"
-        android:smoothScrollbar="true" />
+        android:layout_height="wrap_content"
+        android:text="Bluetooth received files"
+        android:textColor="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@id/list_received_files"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <ListView
         android:id="@+id/list_received_files"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         app:layout_constraintBottom_toTopOf="@id/button_receive"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_files" />
+        app:layout_constraintTop_toBottomOf="@id/label" />
 
     <Button
         android:id="@+id/button_receive"
@@ -34,8 +51,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="20dp"
         android:text="receive via bluetooth"
-        app:layout_constraintTop_toBottomOf="@id/text_files"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/list_received_files"
+        app:layout_constraintBottom_toTopOf="@id/test_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

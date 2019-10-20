@@ -32,6 +32,11 @@ import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
 
 import static com.team33.meetingmate.MainActivity.TAG;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -42,17 +47,19 @@ public class FilesFragment extends Fragment {
     private FilesViewModel filesViewModel;
     private View view;
     private AppActivity activity;
+    private FilesAdapter adapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         filesViewModel =
                 ViewModelProviders.of(this).get(FilesViewModel.class);
         View root = inflater.inflate(R.layout.fragment_files, container, false);
-
+/*
         ArrayList<FileItem> files = new ArrayList<>();
-        FilesAdapter adapter = new FilesAdapter(Objects.requireNonNull(getActivity()), R.layout.file_list_item, files);
+        adapter = new FilesAdapter(Objects.requireNonNull(getActivity()), R.layout.file_list_item, files);
         ListView listView = root.findViewById(R.id.file_list_view);
         listView.setAdapter(adapter);
+
 
         // Fetch links to all files
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -121,6 +128,8 @@ public class FilesFragment extends Fragment {
                     }
                 });
 
+
+         */
         return root;
     }
 
@@ -131,22 +140,29 @@ public class FilesFragment extends Fragment {
         view = getView();
         activity = ((AppActivity) getActivity());
 
+        ImageView imageView = (ImageView)view.findViewById(R.id.test_image);
+        System.out.println(imageView.toString());
+
         ListView listReceivedFiles = (ListView) view.findViewById(R.id.list_received_files);
         listReceivedFiles.setAdapter(activity.getReceivedFilesArrayAdapter());
         listReceivedFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 byte[] imageByteArray = (byte[]) parent.getAdapter().getItem(position);
-                System.out.println(imageByteArray);
-                // Display image
-                ImageView imgViewer = (ImageView) view.findViewById(R.id.test_image);
-                BitmapFactory bmf = new BitmapFactory();
-                Bitmap bm = bmf.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-                if (bm != null) {
+                System.out.println(imageByteArray.length);
+
+//                try {
+//                    adapter.add((FileItem) new ObjectInputStream(new ByteArrayInputStream(imageByteArray)).readObject());
+//                } catch (IOException e) {
+//                    e.printStack
+                try {
+                    Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
                     DisplayMetrics dm = new DisplayMetrics();
                     activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-                    imgViewer.setMinimumHeight(dm.heightPixels);
-                    imgViewer.setMinimumWidth(dm.widthPixels);
-                    imgViewer.setImageBitmap(bm);
+                    imageView.setMinimumHeight(dm.heightPixels);
+                    imageView.setMinimumWidth(dm.widthPixels);
+                    imageView.setImageBitmap(bm);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });

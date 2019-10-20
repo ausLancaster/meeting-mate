@@ -19,6 +19,11 @@
             android:label="@string/title_activity_calendar"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".LauncherActivity">
+
+        </activity>
+        <activity
+            android:name=".AppActivity"
+            android:label="@string/title_activity_app">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,10 +32,6 @@
 
                 <data android:mimeType="application/octet-stream" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".AppActivity"
-            android:label="@string/title_activity_app">
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ui.authentication.LoginActivity" />

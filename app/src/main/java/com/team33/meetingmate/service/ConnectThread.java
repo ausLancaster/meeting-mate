@@ -3,6 +3,7 @@ package com.team33.meetingmate.service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.net.Uri;
 import android.util.Log;
 
 import java.io.IOException;
@@ -17,13 +18,12 @@ public class ConnectThread extends Thread {
     private final BluetoothDevice mmDevice;
     private byte[] mmFileBytes;
 
-    public ConnectThread(BluetoothDevice device, byte[] fileBytes) {
+    public ConnectThread(BluetoothDevice device, byte[] bytes) {
         // Use a temporary object that is later assigned to mmSocket
         // because mmSocket is final.
         BluetoothSocket tmp = null;
         mmDevice = device;
-        Log.d(TAG, "OUTPUT BYTES IS " + fileBytes.toString());
-        mmFileBytes = fileBytes;
+        mmFileBytes = bytes;
 
         try {
             // Get a BluetoothSocket to connect with the given BluetoothDevice.

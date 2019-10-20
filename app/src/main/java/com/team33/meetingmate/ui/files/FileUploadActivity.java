@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -32,6 +33,12 @@ import com.team33.meetingmate.service.ConnectThread;
 import com.team33.meetingmate.Constants;
 import com.team33.meetingmate.R;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -167,8 +174,27 @@ public class FileUploadActivity extends AppCompatActivity {
                 String address = ((String) parent.getAdapter().getItem(position)).split(",")[1];
                 Log.d(TAG, "Bluetooth: Attempting to connect to " + name);
                 BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
-                ConnectThread connectThread = new ConnectThread(device, fileURI.getPath().getBytes());
-                connectThread.start();
+                System.out.println(fileURI);
+                System.out.println(fileName);
+
+                try {
+                    InputStream is = getContentResolver().openInputStream(fileURI);
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    byte[] b = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(b)) != -1) {
+                        bos.write(b, 0, bytesRead);
+                    }
+                    byte[] bytes = bos.toByteArray();
+                    System.out.println("READ FILE OF BYTE LENGTH " + bytes.length);
+
+                    ConnectThread connectThread = new ConnectThread(device, bytes);
+                    connectThread.start();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
