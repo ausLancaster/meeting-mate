@@ -110,7 +110,7 @@ public class FileUploadActivity extends AppCompatActivity implements IEventsFetc
     public void onComplete(List<Map<String, Object>> eventsList) {
         radioGroup.setOrientation(LinearLayout.VERTICAL);
 
-        for (int i = eventsList.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < eventsList.size(); i++) {
             Map<String, Object> event = eventsList.get(i);
 
             RadioButton radioButton = new RadioButton(FileUploadActivity.this);
