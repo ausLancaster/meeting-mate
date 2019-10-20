@@ -64,10 +64,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
     static final int REQUEST_ACCOUNT_PICKER = 2;
 
-    static final float MINUTES_NOTIFY_BEFORE_EVENT = 15;
-
-    static final float MINUTES_NOTIFY_BEFORE_MOVE = 45;
-
     private static final String APPLICATION_NAME = "Google Calendar API";
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
@@ -137,7 +133,13 @@ public class CreateEventActivity extends AppCompatActivity {
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        //LatLng ne = new LatLng(37.8136,144.9646);
+        //LatLng sw = new LatLng(37.92,145.0);
+        //ne = new LatLng(-33.880490, 151.184363);
+        //sw = new LatLng(-33.858754, 151.229596));
+        //autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(ne, sw));
+        autocompleteFragment.setCountry("AU");
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -322,6 +324,8 @@ public class CreateEventActivity extends AppCompatActivity {
         eventData.put("summary", name);
         if (selectedPlace != null) {
             eventData.put("place", selectedPlace.toString());
+            eventData.put("latitude", selectedPlace.getLatLng().latitude);
+            eventData.put("longitude", selectedPlace.getLatLng().longitude);
         }
         eventData.put("startDate", startDate.getTime());
         eventData.put("endDate", endDate.getTime());
@@ -333,17 +337,23 @@ public class CreateEventActivity extends AppCompatActivity {
 
         // Set alarm for notification
 
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(year, month, day, startHour, startMin);
+
         Intent alarmIntent = new Intent(this, EventAlarmReceiver.class);
-        alarmIntent.putExtra("Event Name", name);
+        alarmIntent.putExtra("Name", name);
+        alarmIntent.putExtra("id", eventId);
+        if (selectedPlace != null) {
+            alarmIntent.putExtra("Latitude", selectedPlace.getLatLng().latitude);
+            alarmIntent.putExtra("Longitude", selectedPlace.getLatLng().longitude);
+        }
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1234, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.set(year, month, day, startHour, startMin);
+        // cal.add(java.util.Calendar.MINUTE, -NotificationsDeliver.MINUTES_NOTIFY_BEFORE_EVENT);
         // cal = java.util.Calendar.geInstance();
         // cal.add(java.util.Calendar.SECOND, 3);
-        // manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
         manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
         // Go to calendar

@@ -2,6 +2,7 @@ package com.team33.meetingmate;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Build;
 
@@ -10,8 +11,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 
 public class NotificationsDeliver {
 
@@ -19,6 +24,9 @@ public class NotificationsDeliver {
     private final static String CHANNEL_NAME = "meeting mate notifications channel";
     private final static String CHANNEL_DESCRIPTION = "meeting mate notifications channel";
 
+    public static final int MINUTES_NOTIFY_BEFORE_EVENT = 1;
+
+    public static final int MINUTES_NOTIFY_BEFORE_MOVE = 2;
 
     private static NotificationsDeliver instance;
 
@@ -46,7 +54,14 @@ public class NotificationsDeliver {
         }
     }
 
-    public void sendNotification(@NonNull Context context, String title, String text ) {
+    public void sendNotification(@NonNull Context context, String title, String text) {
+        sendNotification(context, title, text, null);
+    }
+
+        public void sendNotification(@NonNull Context context, String title, String text, PendingIntent pendingIntent ) {
+
+        // Send notification to phone
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_event_note_white_24dp)
                 .setContentTitle(title)
@@ -54,12 +69,24 @@ public class NotificationsDeliver {
 //                .setStyle(new NotificationCompat.BigTextStyle()
 //                        .bigText("Much longer text that cannot fit one line..."))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setVibrate(new long[] { 1000, 1000, 1000 });
+                .setVibrate(new long[] { 1000, 1000, 1000 })
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
-        // notificationId is a unique int for each notification that you must define
-        int randomId = new Random().nextInt();
         notificationManager.notify(999, builder.build());
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> notificationData = new HashMap<>();
+            notificationData.put("text", text);
+            notificationData.put("date", Calendar.getInstance().getTimeInMillis());
+
+        db.collection("notifications")
+                .document(Integer.toString(notificationData.hashCode()))
+                .set(notificationData);
+
+
     }
 }

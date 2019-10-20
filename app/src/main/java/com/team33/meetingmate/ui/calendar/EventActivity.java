@@ -23,11 +23,17 @@ import java.util.Map;
 
 public class EventActivity extends AppCompatActivity {
 
-    private CalendarViewModel calendarViewModel;
+    @Override
+    public void onNewIntent(Intent newIntent) {
+        Log.d("Calendar", "newIntent");
+        super.onNewIntent(newIntent);
+        this.setIntent(newIntent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("Calendar", "event activity");
         setContentView(R.layout.content_show_event);
 
         final TextView name = findViewById(R.id.eventName);
@@ -36,8 +42,7 @@ public class EventActivity extends AppCompatActivity {
         final TextView location = findViewById(R.id.eventLocation);
 
         Intent intent = getIntent();
-        long id = intent.getLongExtra("EventID", 0);
-
+        long id = intent.getLongExtra("id", 0);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
