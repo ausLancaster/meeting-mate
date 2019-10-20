@@ -1,4 +1,4 @@
-package com.team33.meetingmate.ui.files.download.helper;
+package com.team33.meetingmate.ui.files.firebase;
 
 import com.team33.meetingmate.ui.files.FileItem;
 

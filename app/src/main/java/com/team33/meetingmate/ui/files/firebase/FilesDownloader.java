@@ -1,4 +1,4 @@
-package com.team33.meetingmate.ui.files.download.helper;
+package com.team33.meetingmate.ui.files.firebase;
 
 import android.net.Uri;
 import android.util.Log;
