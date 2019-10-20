@@ -3,8 +3,10 @@ package com.team33.meetingmate;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +14,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -38,6 +39,8 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.team33.meetingmate.ui.calendar.EventAlarmTravelReceiver;
+import com.team33.meetingmate.ui.notifications.NotificationsDeliver;
 import com.team33.meetingmate.ui.settings.SettingsFragment;
 
 import java.util.Arrays;
@@ -130,7 +133,13 @@ public class CreateEventActivity extends AppCompatActivity {
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        //LatLng ne = new LatLng(37.8136,144.9646);
+        //LatLng sw = new LatLng(37.92,145.0);
+        //ne = new LatLng(-33.880490, 151.184363);
+        //sw = new LatLng(-33.858754, 151.229596));
+        //autocompleteFragment.setLocationRestriction(RectangularBounds.newInstance(ne, sw));
+        autocompleteFragment.setCountry("AU");
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -168,14 +177,7 @@ public class CreateEventActivity extends AppCompatActivity {
         return null;
     }
 
-    private DatePickerDialog.OnDateSetListener myDateListener = new
-            DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker arg0,
-                                      int arg1, int arg2, int arg3) {
-                    showDate(arg1, arg2+1, arg3);
-                }
-            };
+    private DatePickerDialog.OnDateSetListener myDateListener = (arg0, arg1, arg2, arg3) -> showDate(arg1, arg2+1, arg3);
 
     private TimePickerDialog.OnTimeSetListener myStartTimeListener = new TimePickerDialog.OnTimeSetListener() {
         @Override
@@ -209,11 +211,11 @@ public class CreateEventActivity extends AppCompatActivity {
     public void showTime(TextView timeTextView, int hour, int min) {
 
         if (timeTextView == startTime) {
-            Log.d("Calendar", "set start time");
+            //Log.d("Calendar", "set start time");
             startHour = hour;
             startMin = min;
         } else {
-            Log.d("Calendar", "set end time");
+            //Log.d("Calendar", "set end time");
             endHour = hour;
             endMin = min;
         }
@@ -260,7 +262,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     void refreshView() {
         for (Event event : items) {
-            Log.d("Calendar", event.getSummary());
+            //Log.d("Calendar", event.getSummary());
         }
     }
 
@@ -274,9 +276,15 @@ public class CreateEventActivity extends AppCompatActivity {
 
     public void createEvent(View view) {
 
-        EditText editName = findViewById(R.id.editText);
+        // Create event and save to google calendar
+
+        EditText editText = findViewById(R.id.editText);
+        String name = editText.getText().toString();
+        if (name.equals("")) {
+            name = "(No title)";
+        }
         event = new Event()
-            .setSummary(editName.getText().toString());
+            .setSummary(name);
 
         if (selectedPlace != null) {
             event.setLocation(selectedPlace.toString());
@@ -301,12 +309,16 @@ public class CreateEventActivity extends AppCompatActivity {
             AsyncInsertEvent.run(this);
         }
 
+        // Save event to firestore
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> eventData = new HashMap<>();
-        eventData.put("summary", editName.getText().toString());
+        eventData.put("summary", name);
         if (selectedPlace != null) {
             eventData.put("place", selectedPlace.toString());
+            eventData.put("latitude", selectedPlace.getLatLng().latitude);
+            eventData.put("longitude", selectedPlace.getLatLng().longitude);
         }
         eventData.put("startDate", startDate.getTime());
         eventData.put("endDate", endDate.getTime());
@@ -315,6 +327,30 @@ public class CreateEventActivity extends AppCompatActivity {
         db.collection("events")
                 .document(Integer.toString(eventId))
                 .set(eventData);
+
+        // Set alarm for notification
+
+        Intent alarmIntent = new Intent(this, EventAlarmTravelReceiver.class);
+        alarmIntent.putExtra("Name", name);
+        alarmIntent.putExtra("id", eventId);
+        java.util.Calendar eventCal = java.util.Calendar.getInstance();
+        eventCal.set(year, month, day, startHour, startMin);
+        alarmIntent.putExtra("time", eventCal.getTimeInMillis());
+
+        if (selectedPlace != null) {
+            alarmIntent.putExtra("Latitude", selectedPlace.getLatLng().latitude);
+            alarmIntent.putExtra("Longitude", selectedPlace.getLatLng().longitude);
+        }
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1234, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(year, month, day, startHour, startMin);
+        cal.add(java.util.Calendar.MINUTE, -NotificationsDeliver.MINUTES_NOTIFY_BEFORE_MOVE);
+        manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        // Go to calendar
 
         Intent intent = new Intent(this, AppActivity.class);
         startActivity(intent);

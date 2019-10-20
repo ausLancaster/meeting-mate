@@ -62,13 +62,10 @@ public class CalendarAdapter extends ArrayAdapter<Map<String, Object>> {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, EventActivity.class);
-                intent.putExtra("EventID", (long) eventData.get("id"));
-                context.startActivity(intent);
-            }
+        view.setOnClickListener(view1 -> {
+            Intent intent = new Intent(context, EventActivity.class);
+            intent.putExtra("id", (long) eventData.get("id"));
+            context.startActivity(intent);
         });
 
         viewHolder.title.setText((String) eventData.get("summary"));

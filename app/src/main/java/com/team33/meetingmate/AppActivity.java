@@ -9,6 +9,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -102,7 +104,6 @@ public class AppActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-
         // Firebase storage
         mStorage = FirebaseStorage.getInstance().getReference();
 
@@ -148,6 +149,7 @@ public class AppActivity extends AppCompatActivity {
                 closeFABMenu();
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
                 startActivityForResult(intent, DOCUMENT_RESULT_REQUEST_CODE);
             }
         });
@@ -178,6 +180,7 @@ public class AppActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         // Location services
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -220,6 +223,12 @@ public class AppActivity extends AppCompatActivity {
 
         // Bluetooth Files
         receivedFilesArrayAdapter = new ArrayAdapter<byte[]>(this, R.layout.simple_list_item_1, android.R.id.text1);
+
+        if ( ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    0);
+        }
 
     }
 
@@ -277,25 +286,16 @@ public class AppActivity extends AppCompatActivity {
                     Intent intent = new Intent(this, FileUploadActivity.class);
                     intent.putExtra(Constants.EXTRAS_IMAGE_DATA, stream.toByteArray());
                     intent.putExtra(Constants.EXTRAS_FILE_NAME, timestamp);
-                    intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, "png");
+                    intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, "jpeg");
                     intent.putExtra(Constants.ExtrasFileType, Constants.IMAGE_FILE_TYPE);
                     startActivity(intent);
                     break;
                 case DOCUMENT_RESULT_REQUEST_CODE:
-                    Uri uri = data.getData();
-                    String fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
-                    intent = new Intent(this, FileUploadActivity.class);
-                    intent.putExtra(Constants.EXTRAS_FILE_URL, uri);
-                    intent.putExtra(Constants.EXTRAS_FILE_NAME, fileName);
-                    startActivity(intent);
-                    break;
                 case AUDIO_RECORDING_RESULT_REQUEST_CODE:
-                    uri = data.getData();
-                    fileName = uri.getLastPathSegment() == null ? timestamp : uri.getLastPathSegment();
+                    Uri uri = data.getData();
                     intent = new Intent(this, FileUploadActivity.class);
                     intent.putExtra(Constants.EXTRAS_FILE_URL, uri);
-                    intent.putExtra(Constants.EXTRAS_FILE_NAME, fileName);
-                    intent.putExtra(Constants.EXTRAS_FILE_EXTENSION, "mp3");
+                    intent.putExtra(Constants.EXTRAS_FILE_NAME, getFileName(uri));
                     startActivity(intent);
                     break;
                 case REQUEST_ENABLE_BT:
@@ -332,6 +332,31 @@ public class AppActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private String getFileName(Uri uri) {
+        String fileName = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (fileName == null) {
+            fileName = uri.getPath();
+            int cut = fileName.lastIndexOf('/');
+            if (cut != -1) {
+                fileName = fileName.substring(cut + 1);
+            }
+        }
+
+
+        Log.d(TAG, "onActivityResult: Filename: " + fileName);
+        return fileName;
     }
 
     private void showFABMenu() {

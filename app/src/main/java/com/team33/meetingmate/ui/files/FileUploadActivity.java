@@ -232,7 +232,6 @@ public class FileUploadActivity extends AppCompatActivity {
                         List<Map<String, Object>> eventsList = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             eventsList.add(document.getData());
-                            Log.d("Calendar", document.getId() + " => " + document.getData());
                         }
                         Collections.sort(
                                 eventsList,
