@@ -241,7 +241,7 @@ public class CreateEventActivity extends AppCompatActivity {
             chooseAccount();
         } else {
             // load calendars
-            AsyncLoadTasks.run(this);
+            AsyncLoadEvents.run(this);
         }
     }
 
@@ -258,12 +258,6 @@ public class CreateEventActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
-    }
-
-    void refreshView() {
-        for (Event event : items) {
-            //Log.d("Calendar", event.getSummary());
-        }
     }
 
     @Override
@@ -369,7 +363,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 break;
             case REQUEST_AUTHORIZATION:
                 if (resultCode == Activity.RESULT_OK) {
-                    AsyncLoadTasks.run(this);
+                    AsyncLoadEvents.run(this);
                 } else {
                     chooseAccount();
                 }
@@ -383,7 +377,7 @@ public class CreateEventActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.commit();
-                        AsyncLoadTasks.run(this);
+                        AsyncLoadEvents.run(this);
                     }
                 }
                 break;

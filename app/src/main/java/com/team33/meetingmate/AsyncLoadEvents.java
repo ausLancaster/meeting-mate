@@ -24,9 +24,9 @@ import java.io.IOException;
  *
  * @author Yaniv Inbar
  */
-class AsyncLoadTasks extends CommonAsyncTask {
+class AsyncLoadEvents extends CommonAsyncTask {
 
-    AsyncLoadTasks(CreateEventActivity createEventActivity) {
+    AsyncLoadEvents(CreateEventActivity createEventActivity) {
         super(createEventActivity);
     }
 
@@ -43,6 +43,6 @@ class AsyncLoadTasks extends CommonAsyncTask {
     }
 
     static void run(CreateEventActivity tasksSample) {
-        new AsyncLoadTasks(tasksSample).execute();
+        new AsyncLoadEvents(tasksSample).execute();
     }
 }

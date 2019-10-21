@@ -9,9 +9,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.team33.meetingmate.AppActivity;
@@ -20,8 +18,6 @@ import com.team33.meetingmate.R;
 public class SettingsFragment extends Fragment {
 
     public static boolean syncCalendar = true;
-
-    private static final String TAG = "AppActivity";
 
     private SettingsViewModel settingsViewModel;
     private AppActivity activity;
@@ -36,12 +32,7 @@ public class SettingsFragment extends Fragment {
                 ViewModelProviders.of(this).get(SettingsViewModel.class);
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
         final TextView textView = root.findViewById(R.id.text_settings);
-        settingsViewModel.getText().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        settingsViewModel.getText().observe(this, s -> textView.setText(s));
         return root;
     }
 
